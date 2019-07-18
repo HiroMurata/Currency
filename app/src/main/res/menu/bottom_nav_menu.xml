@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+            android:id="@+id/navigation_home"
+            android:icon="@drawable/ic_home_black_24dp"
+            android:title="@string/usd"/>
+
+    <item
+            android:id="@+id/navigation_dashboard"
+            android:icon="@drawable/ic_dashboard_black_24dp"
+            android:title="@string/eur"/>
+
+    <item
+            android:id="@+id/navigation_notifications"
+            android:icon="@drawable/ic_notifications_black_24dp"
+            android:title="@string/jpy"/>
+
+
+    <item
+            android:id="@+id/eur"
+            android:icon="@drawable/ic_dashboard_black_24dp"
+            android:title="@string/eur"/>
+
+    <item
+            android:id="@+id/jpy"
+            android:icon="@drawable/ic_notifications_black_24dp"
+            android:title="@string/jpy"/>
+
+<!--
+６個にすると幅が入らずエラーになる。あとで
+    <item
+            android:id="@+id/usd"
+            android:icon="@drawable/ic_home_black_24dp"
+            android:title="@string/usd"/>
+-->
+
+
+</menu>
