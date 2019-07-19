@@ -2,26 +2,24 @@ package com.hiro.currencyradar
 
 import android.content.Intent
 import android.graphics.Color
-import android.icu.lang.UCharacter.GraphemeClusterBreak.V
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.TextView
+import com.fasterxml.jackson.core.type.TypeReference
 import com.github.mikephil.charting.animation.Easing
-import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.IValueFormatter
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.IRadarDataSet
 import kotlinx.android.synthetic.main.activity_main.*
 import com.github.mikephil.charting.data.RadarData
-import java.lang.reflect.Array.set
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.result.Result
-import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi
-import kotlin.reflect.jvm.internal.impl.resolve.constants.DoubleValue
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 
 class MainActivity : AppCompatActivity() {
 
@@ -105,27 +103,22 @@ class MainActivity : AppCompatActivity() {
 
 
             //===============================    JSON Purser    ===============================
-            val moshi = Moshi.Builder()
-                .add(com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory()).build()
-
-            val adapter = moshi.adapter(Rates::class.java)
-            val res = adapter.fromJson(response.toString())
-//            res = Rates(adapter.fromJson(String(response.data)))
-
+            val json = String(response.data)
+            val mapper = jacksonObjectMapper()
+            val rates = mapper.readValue<Rates>(json)
 
             println("######################## : ")
-        if (res != null)
-            println("######################## : " + res.base.toString())
 
 
+//            val moshi = Moshi.Builder()
+//                .add(com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory()).build()
+//
+//            val adapter = moshi.adapter(Rates::class.java)
+//            val res = adapter.fromJson(response.data.toString())
+//
 
 
         }    // Asynchronous Processの対の閉じ
-
-
-
-
-
 
 
         //===============================    FOR GRAPH    ===============================
@@ -186,75 +179,78 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-        private fun getRadarData(): ArrayList<IRadarDataSet> {
-            //表示させるデータ
+    private fun getRadarData(): ArrayList<IRadarDataSet> {
+        //表示させるデータ
 
-            val current = floatArrayOf(1.02f, 0.96f, 0.93f, 1.05f, 0.95f, 0.96f)
-            val entries = ArrayList<RadarEntry>().apply {
-                add(RadarEntry(current[0], 0))
-                add(RadarEntry(current[1], 1))
-                add(RadarEntry(current[2], 2))
-                add(RadarEntry(current[3], 3))
-                add(RadarEntry(current[4], 4))
-                add(RadarEntry(current[5], 5))
+        val current = floatArrayOf(1.02f, 0.96f, 0.93f, 1.05f, 0.95f, 0.96f)
+        val entries = ArrayList<RadarEntry>().apply {
+            add(RadarEntry(current[0], 0))
+            add(RadarEntry(current[1], 1))
+            add(RadarEntry(current[2], 2))
+            add(RadarEntry(current[3], 3))
+            add(RadarEntry(current[4], 4))
+            add(RadarEntry(current[5], 5))
 
-            }
+        }
 
-            val average = floatArrayOf(1f, 1f, 1f, 1f, 1f, 1f)
-            val entries2 = ArrayList<RadarEntry>().apply {
-                add(RadarEntry(average[0], 0))
-                add(RadarEntry(average[1], 1))
-                add(RadarEntry(average[2], 2))
-                add(RadarEntry(average[3], 3))
-                add(RadarEntry(average[4], 4))
-                add(RadarEntry(average[5], 5))
-            }
+        val average = floatArrayOf(1f, 1f, 1f, 1f, 1f, 1f)
+        val entries2 = ArrayList<RadarEntry>().apply {
+            add(RadarEntry(average[0], 0))
+            add(RadarEntry(average[1], 1))
+            add(RadarEntry(average[2], 2))
+            add(RadarEntry(average[3], 3))
+            add(RadarEntry(average[4], 4))
+            add(RadarEntry(average[5], 5))
+        }
 
 
-            val dataSet = RadarDataSet(entries, "current")
-            dataSet.apply {
-                //整数で表示
-                valueFormatter = IValueFormatter { value, _, _, _ -> "" + value.toInt() }
-                //塗りつぶし
-                setDrawFilled(true)
-                fillColor = Color.BLUE
+        val dataSet = RadarDataSet(entries, "current")
+        dataSet.apply {
+            //整数で表示
+            valueFormatter = IValueFormatter { value, _, _, _ -> "" + value.toInt() }
+            //塗りつぶし
+            setDrawFilled(true)
+            fillColor = Color.BLUE
 
-                //ハイライト
-                isHighlightEnabled = true
-                highLightColor = Color.BLUE
-                //B色をセット
+            //ハイライト
+            isHighlightEnabled = true
+            highLightColor = Color.BLUE
+            //B色をセット
 //                setColors(intArrayOf(R.color.material_blue, R.color.material_green, R.color.material_yellow), this@MainActivity)
-                color = Color.BLUE
+            color = Color.BLUE
 //                setColor(R.color.material_yellow)
-            }
+        }
 
-            val dataSet2 = RadarDataSet(entries2, "avarage").apply {
-                //整数で表示
+        val dataSet2 = RadarDataSet(entries2, "avarage").apply {
+            //整数で表示
 //                valueFormatter = IValueFormatter { value, _, _, _ -> "" + value.toInt() }
-                //塗りつぶし
-                setDrawFilled(true)
-                fillColor = Color.RED
+            //塗りつぶし
+            setDrawFilled(true)
+            fillColor = Color.RED
 
-                //ハイライトさせない
-                isHighlightEnabled = false
-                //色をセット
+            //ハイライトさせない
+            isHighlightEnabled = false
+            //色をセット
 //                setColors(intArrayOf(R.color.material_blue), this@MainActivity)
 //                setColor(R.color.material_blue)
 //                color = R.color.material_blue
-                highLightColor = Color.RED
-                color = Color.RED
+            highLightColor = Color.RED
+            color = Color.RED
 
-            }
-
-
-
-            val radarDataSets = ArrayList<IRadarDataSet>()
-            radarDataSets.add(dataSet)
-            radarDataSets.add(dataSet2)
-
-
-            return radarDataSets
         }
+
+
+
+        val radarDataSets = ArrayList<IRadarDataSet>()
+        radarDataSets.add(dataSet)
+        radarDataSets.add(dataSet2)
+
+
+        return radarDataSets
+    }
+
+
+
 
 
 
