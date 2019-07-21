@@ -17,34 +17,69 @@ import kotlinx.android.synthetic.main.activity_main.*
 import com.github.mikephil.charting.data.RadarData
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.result.Result
-import com.squareup.moshi.Moshi
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import android.preference.PreferenceManager
+import android.content.SharedPreferences
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
+
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var textMessage: TextView
+
     private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
+        val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+
         when (item.itemId) {
             R.id.navigation_home -> {
                 textMessage.setText(R.string.usd)
+
+                var editor = sharedPref.edit()
+                editor.putString("base", "USD")
+                editor.commit()
+
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_dashboard -> {
                 textMessage.setText(R.string.eur)
+
+                var editor = sharedPref.edit()
+                editor.putString("base", "EUR")
+                editor.commit()
+
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_notifications -> {
                 textMessage.setText(R.string.jpy)
+
+                var editor = sharedPref.edit()
+                editor.putString("base", "JPY")
+                editor.commit()
+
                 return@OnNavigationItemSelectedListener true
             }
 
             R.id.eur -> {
                 textMessage.setText(R.string.eur)
+
+                var editor = sharedPref.edit()
+                editor.putString("base", "EUR")
+                editor.commit()
+
                 return@OnNavigationItemSelectedListener true
             }
             R.id.jpy -> {
                 textMessage.setText(R.string.jpy)
+
+                val editor = sharedPref.edit()
+                editor.putString("base", "JPY")
+                editor.commit()
+
                 return@OnNavigationItemSelectedListener true
             }
 
@@ -60,6 +95,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_main)
         val navViewTerm: BottomNavigationView = findViewById(R.id.nav_view_term)
 
@@ -75,22 +111,24 @@ class MainActivity : AppCompatActivity() {
         navViewTerm.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
 
 
+        // Generate URL
+        val latestUrl: String = getLatestUrl()
+        val periodUrl: String = getPeriodUrl()
+
+        // Get rate
+        var latestMap: Map<String, Object> = HashMap<String, Object>()
+        var periodMap: Map<String, Object> = HashMap<String, Object>()
+
+        latestMap = getRate(latestUrl)
+        periodMap = getRate(periodUrl)
 
 
-        //===============================    HTTP Process    ===============================
-//        val res  = Rates("USD", "", rates = Rate("", 1.24))
-//        val res  : Rates?
-//        res  = Rates("USD", "", rates = Rate("", 1.24))
-
-
-
-//        //        // Synchronous Process
-//        val triple = "https://api.exchangeratesapi.io/latest".httpGet().response()
-//        // Show Result
-//        println("Result of Synchronous Process : " + String(triple.second.data))
+        // TODO 整理 下記の呼び出しがメインからだとデータ取れるけど、メソッドに移すと取れない。
+        // Asynchronousはインナークラスにしてレスポンスが戻ってからの処理を書かなければだめ？
+        // https://qiita.com/jonghyo/items/0eb58923cfcff2ae9fc4 ここは使えなかった。。
 
         // Asynchronous Process
-        "https://api.exchangeratesapi.io/latest".httpGet().response { request, response, result ->
+        latestUrl.httpGet().responseString { request, response, result ->
             when (result) {
                 is Result.Success -> {
                     // Show Result
@@ -101,36 +139,85 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-
             //===============================    JSON Purser    ===============================
             val json = String(response.data)
+
+            //Complicated Json must be used <String, Object>
+            var map: Map<String, Object> = HashMap<String, Object>()
             val mapper = jacksonObjectMapper()
-            val rates = mapper.readValue<Rates>(json)
 
-            println("######################## : ")
+            map = mapper.readValue(json, object : TypeReference<HashMap<String, Object>>() {
 
+            })
 
-//            val moshi = Moshi.Builder()
-//                .add(com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory()).build()
-//
-//            val adapter = moshi.adapter(Rates::class.java)
-//            val res = adapter.fromJson(response.data.toString())
-//
-
+            println("######################## : " + latestUrl)
+            latestMap = HashMap(map)
+            println(latestMap)
 
         }    // Asynchronous Processの対の閉じ
 
+        // Asynchronous Process
+        periodUrl.httpGet().responseString { request, response, result ->
+            when (result) {
+                is Result.Success -> {
+                    // Show Result
+                    println("Result of Asynchronous Process : " + String(response.data))
+                }
+                is Result.Failure -> {
+                    println("Connection Failure")
+                }
+            }
+
+            //===============================    JSON Purser    ===============================
+            val json = String(response.data)
+
+            //Complicated Json must be used <String, Object>
+            var map: Map<String, Object> = HashMap<String, Object>()
+            val mapper = jacksonObjectMapper()
+
+            map = mapper.readValue(json, object : TypeReference<HashMap<String, Object>>() {
+
+            })
+
+            println("######################## : " + periodUrl)
+            periodMap = HashMap(map)
+
+        }    // Asynchronous Processの対の閉じ
+
+        println(periodMap)
+
+
+
+        // TODO Latestのデータを解析？
+        //Get target currencies and set to Label of xAxis
+        var items: List<String> = getSelectedCurrency()
+
+        var rateMap: Any? = latestMap.get("rates")
+
+
+        val current = doubleArrayOf(1.02, 0.96, 0.93, 1.05, 0.95, 0.96)
+
+
+
+
+
+        // TODO 平均のデータを解析？
+
+
 
         //===============================    FOR GRAPH    ===============================
+        val selected:  ArrayList<String>
+
         val chart = radar_chart
 
-        val xLabels = ArrayList<String>()
-        xLabels.add("USD")
-        xLabels.add("CNY")
-        xLabels.add("MYR")
-        xLabels.add("JPY")
-        xLabels.add("SPD")
-        xLabels.add("GBP")
+
+
+
+
+
+
+
+        var xLabels:  List<String> = getSelectedCurrency()
 
         val yLabels = ArrayList<String>()
         yLabels.add("")
@@ -140,6 +227,8 @@ class MainActivity : AppCompatActivity() {
         yLabels.add("105%")
         yLabels.add("110%")
         yLabels.add("115%")
+
+
 
 
         //表示データ取得
@@ -178,6 +267,235 @@ class MainActivity : AppCompatActivity() {
 
         }
     }
+
+
+    /*
+     * Call API and retrieve rate
+     */
+    private fun getRate(url: String): Map<String, Object> {
+
+        //Complicated Json must be used <String, Object>
+        var map: Map<String, Object> = HashMap<String, Object>()
+
+        // Asynchronous Process
+        url.httpGet().responseString { request, response, result ->
+            when (result) {
+                is Result.Success -> {
+                    // Show Result
+                    println("[getRate] Result of Asynchronous Process : " + String(response.data))
+                }
+                is Result.Failure -> {
+                    println("Connection Failure")
+                }
+            }
+
+            //===============================    JSON Purser    ===============================
+            val json = String(response.data)
+
+            val mapper = jacksonObjectMapper()
+
+            map = mapper.readValue(json, object : TypeReference<HashMap<String, Object>>() {
+            })
+        }
+        println("★★★★★★★★★★★★★★★★★★★★★★★★ : \n" + url)
+        println(map)
+
+        return map
+    }
+
+
+
+    // これは使ってない
+    private fun getCurrentRate(): Rates? {
+        //===============================    HTTP Process    ===============================
+//        val res  = Rates("USD", "", rates = Rate("", 1.24))
+//        val res  : Rates?
+//        res  = Rates("USD", "", rates = Rate("", 1.24))
+        var rates : Rates?
+        rates = null
+
+        // Asynchronous Process
+        "https://api.exchangeratesapi.io/latest".httpGet().response { request, response, result ->
+            when (result) {
+                is Result.Success -> {
+                    // Show Result
+                    println("Result of Asynchronous Process : " + String(response.data))
+
+                    //===============================    JSON Purser    ===============================
+                    val json = String(response.data)
+                    val mapper = jacksonObjectMapper()
+                    rates = mapper.readValue<Rates>(json)
+                }
+                is Result.Failure -> {
+                    println("Connection Failure")
+                }
+            }
+        }
+        return rates
+    }
+
+
+    private fun getLatestUrl(): String {
+
+        // setting file
+        val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        var editor = sharedPref.edit()
+
+        //===============================    HTTP Process    ===============================
+        var latestURL: String = "https://api.exchangeratesapi.io/latest"
+
+        var base = sharedPref.getString("base","")
+        var selected = sharedPref.getString("selected","")
+
+        if (base.isNullOrEmpty()) {
+            //for the first time before SharedPreferences have set
+            editor.putString("base", "USD")
+            editor.putString("selected", "EUR,GBP,JPY,CNY")
+            editor.commit()
+
+            latestURL = latestURL + "?base=" + "USD" + "&symbols=EUR,GBP,JPY,CNY"
+        } else {
+            latestURL = latestURL + "?base=" + base + "&symbols=" + selected
+        }
+        return latestURL
+    }
+
+
+    /*
+     Get URL for period API
+     */
+    private fun getPeriodUrl(): String {
+
+        //get start date and end date
+        val pair: Pair<String, String> = getTargetDates()
+        val startDate = pair.first
+        val endDate = pair.second
+
+        // setting file
+        val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        var editor = sharedPref.edit()
+        var base = sharedPref.getString("base","USD")
+        var selected = sharedPref.getString("selected","EUR,GBP,JPY,CNY")
+
+        var periodURL: String = "https://api.exchangeratesapi.io/history"
+        periodURL = periodURL + "?start_at=" + startDate + "&end_at=" + endDate
+        periodURL = periodURL + "&base=" + base
+        periodURL = periodURL + "&symbols=" + selected
+
+        return periodURL
+    }
+
+
+    /*
+     Get selected currencies from setting file
+     */
+    private fun getSelectedCurrency(): List<String> {
+
+        val defautStr: String = "EUR,GBP,JPY,CNY"
+        // setting file
+        val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        var editor = sharedPref.edit()
+        var selected = sharedPref.getString("selected","")
+
+        val items: List<String>
+        if (selected.isNullOrEmpty()) {
+            //for the first time before SharedPreferences have set
+            editor.putString("selected", defautStr)
+            editor.commit()
+
+            items = getItems(defautStr)
+        } else {
+            items = getItems(selected)
+
+        }
+        return items
+    }
+
+
+    private fun getItems(str: String): List<String> {
+
+
+//        val items:ArrayList<String> = str.split(",")
+//        val itemss = arrayListOf(str.split(","))
+        val items = str.split(",")
+
+
+        return items
+    }
+
+
+    /*
+     * Return Pair(startDate, latestDate)
+     */
+    private fun getTargetDates(): Pair<String, String> {
+
+        // end date
+        val date: Date = Date()
+        val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val endDate = format.format(date)
+
+        // setting file
+        val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        var editor = sharedPref.edit()
+        var period = sharedPref.getInt("period", -1)
+
+        if (period == -1) {
+            period = 7
+            //for the first time before SharedPreferences have set
+            editor.putInt("period", 7)
+            editor.commit()
+        }
+
+        var calendar: Calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, -period)
+
+        var startDate: Date = calendar.time
+
+
+        // todo 設定から対象の期間をもってくる
+        // コードがそのまま期間（日）
+//        0 //
+//        7 // 1 week
+//        14 // 2-week
+//        30 // 1-month
+//        60 // 2-month
+//        90 // 3-month
+//        180 // half year
+//        365 // 1-year
+//        730 // 2-year
+//        1095 // 3-year
+//        1825 // 5-year
+
+        var pair: Pair<String, String> = Pair(format.format(startDate), endDate)
+        return  pair
+    }
+
+    // これも使ってない
+    private fun getAverageRate(): Rates? {
+        //===============================    HTTP Process    ===============================
+        var rates : Rates?
+        rates = null
+
+        // Asynchronous Process
+        "https://api.exchangeratesapi.io/latest".httpGet().response { request, response, result ->
+            when (result) {
+                is Result.Success -> {
+                    // Show Result
+                    println("Result of Asynchronous Process : " + String(response.data))
+
+                    //===============================    JSON Purser    ===============================
+                    val json = String(response.data)
+                    val mapper = jacksonObjectMapper()
+                    rates = mapper.readValue<Rates>(json)
+                }
+                is Result.Failure -> {
+                    println("Connection Failure")
+                }
+            }
+        }
+        return rates
+    }
+
 
     private fun getRadarData(): ArrayList<IRadarDataSet> {
         //表示させるデータ
