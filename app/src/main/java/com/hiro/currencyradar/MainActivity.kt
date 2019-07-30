@@ -21,6 +21,12 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import android.preference.PreferenceManager
 import android.content.SharedPreferences
+import android.os.AsyncTask
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.FuelError
+import com.github.kittinunf.fuel.core.Request
+import com.github.kittinunf.fuel.core.Response
+import com.github.kittinunf.fuel.httpPost
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -93,6 +99,10 @@ class MainActivity : AppCompatActivity() {
         false
     }
 
+    // Get rate
+    var latestMap: Map<String, Object> = HashMap<String, Object>()
+    var periodMap: Map<String, Object> = HashMap<String, Object>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -110,81 +120,13 @@ class MainActivity : AppCompatActivity() {
         textMessage = findViewById(R.id.message)
         navViewTerm.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
 
-
         // Generate URL
         val latestUrl: String = getLatestUrl()
         val periodUrl: String = getPeriodUrl()
 
-        // Get rate
-        var latestMap: Map<String, Object> = HashMap<String, Object>()
-        var periodMap: Map<String, Object> = HashMap<String, Object>()
+        //Async
+        MyAsyncTask().execute(latestUrl, periodUrl)
 
-        latestMap = getRate(latestUrl)
-        periodMap = getRate(periodUrl)
-
-
-        // TODO 整理 下記の呼び出しがメインからだとデータ取れるけど、メソッドに移すと取れない。
-        // Asynchronousはインナークラスにしてレスポンスが戻ってからの処理を書かなければだめ？
-        // https://qiita.com/jonghyo/items/0eb58923cfcff2ae9fc4 ここは使えなかった。。
-
-        // Asynchronous Process
-        latestUrl.httpGet().responseString { request, response, result ->
-            when (result) {
-                is Result.Success -> {
-                    // Show Result
-                    println("Result of Asynchronous Process : " + String(response.data))
-                }
-                is Result.Failure -> {
-                    println("Connection Failure")
-                }
-            }
-
-            //===============================    JSON Purser    ===============================
-            val json = String(response.data)
-
-            //Complicated Json must be used <String, Object>
-            var map: Map<String, Object> = HashMap<String, Object>()
-            val mapper = jacksonObjectMapper()
-
-            map = mapper.readValue(json, object : TypeReference<HashMap<String, Object>>() {
-
-            })
-
-            println("######################## : " + latestUrl)
-            latestMap = HashMap(map)
-            println(latestMap)
-
-        }    // Asynchronous Processの対の閉じ
-
-        // Asynchronous Process
-        periodUrl.httpGet().responseString { request, response, result ->
-            when (result) {
-                is Result.Success -> {
-                    // Show Result
-                    println("Result of Asynchronous Process : " + String(response.data))
-                }
-                is Result.Failure -> {
-                    println("Connection Failure")
-                }
-            }
-
-            //===============================    JSON Purser    ===============================
-            val json = String(response.data)
-
-            //Complicated Json must be used <String, Object>
-            var map: Map<String, Object> = HashMap<String, Object>()
-            val mapper = jacksonObjectMapper()
-
-            map = mapper.readValue(json, object : TypeReference<HashMap<String, Object>>() {
-
-            })
-
-            println("######################## : " + periodUrl)
-            periodMap = HashMap(map)
-
-        }    // Asynchronous Processの対の閉じ
-
-        println(periodMap)
 
 
 
@@ -198,9 +140,6 @@ class MainActivity : AppCompatActivity() {
         val current = doubleArrayOf(1.02, 0.96, 0.93, 1.05, 0.95, 0.96)
 
 
-
-
-
         // TODO 平均のデータを解析？
 
 
@@ -209,11 +148,6 @@ class MainActivity : AppCompatActivity() {
         val selected:  ArrayList<String>
 
         val chart = radar_chart
-
-
-
-
-
 
 
 
@@ -270,70 +204,77 @@ class MainActivity : AppCompatActivity() {
 
 
     /*
-     * Call API and retrieve rate
+     * Network access should be handled outside of Main
+     * otherwise android.os.NetworkOnMainThreadException occur
      */
-    private fun getRate(url: String): Map<String, Object> {
+    inner class MyAsyncTask: AsyncTask<String, Void, String>() {
 
-        //Complicated Json must be used <String, Object>
-        var map: Map<String, Object> = HashMap<String, Object>()
+        override fun doInBackground(vararg args: String): String? {
 
-        // Asynchronous Process
-        url.httpGet().responseString { request, response, result ->
-            when (result) {
-                is Result.Success -> {
-                    // Show Result
-                    println("[getRate] Result of Asynchronous Process : " + String(response.data))
+            args[0].httpGet().responseString { request, response, result ->
+                when (result) {
+                    is Result.Success -> {
+                        // Show Result
+                        println("Result of Asynchronous Process : " + String(response.data))
+                    }
+                    is Result.Failure -> {
+                        println("Connection Failure")
+                    }
                 }
-                is Result.Failure -> {
-                    println("Connection Failure")
-                }
+
+                //===============================    JSON Purser    ===============================
+                val json = String(response.data)
+
+                //Complicated Json must be used <String, Object>
+                var map: Map<String, Object> = HashMap<String, Object>()
+                val mapper = jacksonObjectMapper()
+
+                map = mapper.readValue(json, object : TypeReference<HashMap<String, Object>>() {
+
+                })
+
+                println("######################## : " + args[0])
+                latestMap = HashMap(map)
+                println(latestMap)
             }
 
-            //===============================    JSON Purser    ===============================
-            val json = String(response.data)
-
-            val mapper = jacksonObjectMapper()
-
-            map = mapper.readValue(json, object : TypeReference<HashMap<String, Object>>() {
-            })
-        }
-        println("★★★★★★★★★★★★★★★★★★★★★★★★ : \n" + url)
-        println(map)
-
-        return map
-    }
-
-
-
-    // これは使ってない
-    private fun getCurrentRate(): Rates? {
-        //===============================    HTTP Process    ===============================
-//        val res  = Rates("USD", "", rates = Rate("", 1.24))
-//        val res  : Rates?
-//        res  = Rates("USD", "", rates = Rate("", 1.24))
-        var rates : Rates?
-        rates = null
-
-        // Asynchronous Process
-        "https://api.exchangeratesapi.io/latest".httpGet().response { request, response, result ->
-            when (result) {
-                is Result.Success -> {
-                    // Show Result
-                    println("Result of Asynchronous Process : " + String(response.data))
-
-                    //===============================    JSON Purser    ===============================
-                    val json = String(response.data)
-                    val mapper = jacksonObjectMapper()
-                    rates = mapper.readValue<Rates>(json)
+            args[1].httpGet().responseString { request, response, result ->
+                when (result) {
+                    is Result.Success -> {
+                        // Show Result
+                        println("Result of Asynchronous Process : " + String(response.data))
+                    }
+                    is Result.Failure -> {
+                        println("Connection Failure")
+                    }
                 }
-                is Result.Failure -> {
-                    println("Connection Failure")
-                }
+
+                //===============================    JSON Purser    ===============================
+                val json = String(response.data)
+
+                //Complicated Json must be used <String, Object>
+                var map: Map<String, Object> = HashMap<String, Object>()
+                val mapper = jacksonObjectMapper()
+
+                map = mapper.readValue(json, object : TypeReference<HashMap<String, Object>>() {
+
+                })
+
+                println("######################## : " + args[1])
+                periodMap = HashMap(map)
+                println(periodMap)
             }
-        }
-        return rates
-    }
 
+            return null
+        }
+
+        override fun onPostExecute(result: String?) {
+            super.onPostExecute(result)
+//            val tview = findViewById<TextView>(R.id.mytext)
+//            tview.setText(result)
+
+        }
+    }
 
     private fun getLatestUrl(): String {
 
@@ -470,31 +411,7 @@ class MainActivity : AppCompatActivity() {
         return  pair
     }
 
-    // これも使ってない
-    private fun getAverageRate(): Rates? {
-        //===============================    HTTP Process    ===============================
-        var rates : Rates?
-        rates = null
 
-        // Asynchronous Process
-        "https://api.exchangeratesapi.io/latest".httpGet().response { request, response, result ->
-            when (result) {
-                is Result.Success -> {
-                    // Show Result
-                    println("Result of Asynchronous Process : " + String(response.data))
-
-                    //===============================    JSON Purser    ===============================
-                    val json = String(response.data)
-                    val mapper = jacksonObjectMapper()
-                    rates = mapper.readValue<Rates>(json)
-                }
-                is Result.Failure -> {
-                    println("Connection Failure")
-                }
-            }
-        }
-        return rates
-    }
 
 
     private fun getRadarData(): ArrayList<IRadarDataSet> {
