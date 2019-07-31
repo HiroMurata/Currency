@@ -18,20 +18,13 @@ import com.github.mikephil.charting.data.RadarData
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.result.Result
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import android.preference.PreferenceManager
 import android.content.SharedPreferences
 import android.os.AsyncTask
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.FuelError
-import com.github.kittinunf.fuel.core.Request
-import com.github.kittinunf.fuel.core.Response
-import com.github.kittinunf.fuel.httpPost
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
-import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
 
 class MainActivity : AppCompatActivity() {
@@ -100,8 +93,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Get rate
-    var latestMap: Map<String, Object> = HashMap<String, Object>()
-    var periodMap: Map<String, Object> = HashMap<String, Object>()
+    var latestMap: Map<String, Any> = HashMap<String, Any>()
+    var periodMap: Map<String, Any> = HashMap<String, Any>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,12 +102,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val navViewTerm: BottomNavigationView = findViewById(R.id.nav_view_term)
 
-
         button.setOnClickListener {
             Log.d("MainActivity: onCreate", "Button Clicked!")
             val intent = Intent(this, MainSetting::class.java)
             startActivity(intent)
-
         }
 
         textMessage = findViewById(R.id.message)
@@ -124,82 +115,28 @@ class MainActivity : AppCompatActivity() {
         val latestUrl: String = getLatestUrl()
         val periodUrl: String = getPeriodUrl()
 
+        println("★ ★ ★ ★ ★  非同期の前: ")
+
         //Async
-        MyAsyncTask().execute(latestUrl, periodUrl)
+        AsyncTaskGetLatest().execute(latestUrl)
+        AsyncTaskGetAverage().execute(periodUrl)
+        AsyncTaskGetChart().execute()
 
-
+        println("★ ★ ★ ★ ★  非同期のあと １: ")
 
 
         // TODO Latestのデータを解析？
         //Get target currencies and set to Label of xAxis
-        var items: List<String> = getSelectedCurrency()
-
-        var rateMap: Any? = latestMap.get("rates")
 
 
         val current = doubleArrayOf(1.02, 0.96, 0.93, 1.05, 0.95, 0.96)
 
 
         // TODO 平均のデータを解析？
+        println("★ ★ ★ ★ ★  非同期のあと ２: ")
 
 
 
-        //===============================    FOR GRAPH    ===============================
-        val selected:  ArrayList<String>
-
-        val chart = radar_chart
-
-
-
-        var xLabels:  List<String> = getSelectedCurrency()
-
-        val yLabels = ArrayList<String>()
-        yLabels.add("")
-        yLabels.add("90%")
-        yLabels.add("95%")
-        yLabels.add("100%")
-        yLabels.add("105%")
-        yLabels.add("110%")
-        yLabels.add("115%")
-
-
-
-
-        //表示データ取得
-        chart.data = RadarData(getRadarData())
-
-
-        //グラフ上の表示
-        chart.apply {
-
-            chart.invalidate()//チャートの表示を更新したいときに呼ぶ
-            chart.setDrawWeb(true)
-            chart.webLineWidth = 3f
-            chart.description.isEnabled = true
-            chart.description.text = "こういうこと"
-            chart.isClickable = true
-            chart.legend.isEnabled = true //凡例
-            animateY(1800, Easing.EasingOption.Linear)
-            chart.isRotationEnabled = true//ドラックすると回転するので制御する
-
-            chart.xAxis.setValueFormatter(IndexAxisValueFormatter(xLabels))
-//            chart.yAxis.setValueFormatter(IndexAxisValueFormatter(yLabels))
-
-
-
-
-            chart.yAxis.labelPosition.ordinal.and(0)
-            chart.yAxis.labelPosition.ordinal.and(1)
-            chart.yAxis.labelPosition.ordinal.and(3)
-            chart.yAxis.labelPosition.ordinal.and(2)
-
-            chart.yAxis.setDrawLabels(true)//値の目盛表記
-            chart.yAxis.labelCount=6
-
-//            chart.scaleX = 1f //X方向の表示倍率
-//            chart.scaleY = 1f //Y方向の表示倍率
-
-        }
     }
 
 
@@ -207,74 +144,164 @@ class MainActivity : AppCompatActivity() {
      * Network access should be handled outside of Main
      * otherwise android.os.NetworkOnMainThreadException occur
      */
-    inner class MyAsyncTask: AsyncTask<String, Void, String>() {
+    inner class AsyncTaskGetLatest: AsyncTask<String, Void, String>() {
 
         override fun doInBackground(vararg args: String): String? {
 
-            args[0].httpGet().responseString { request, response, result ->
-                when (result) {
-                    is Result.Success -> {
-                        // Show Result
-                        println("Result of Asynchronous Process : " + String(response.data))
-                    }
-                    is Result.Failure -> {
-                        println("Connection Failure")
-                    }
+            val (request, response, result) = args[0].httpGet().responseString()
+
+            when (result) {
+                is  Result.Success -> {
+                    // Show Result
+                    println("Result of Asynchronous Process : " + String(response.data))
                 }
-
-                //===============================    JSON Purser    ===============================
-                val json = String(response.data)
-
-                //Complicated Json must be used <String, Object>
-                var map: Map<String, Object> = HashMap<String, Object>()
-                val mapper = jacksonObjectMapper()
-
-                map = mapper.readValue(json, object : TypeReference<HashMap<String, Object>>() {
-
-                })
-
-                println("######################## : " + args[0])
-                latestMap = HashMap(map)
-                println(latestMap)
+                is Result.Failure -> {
+                    println("Connection Failure")
+                }
             }
 
-            args[1].httpGet().responseString { request, response, result ->
-                when (result) {
-                    is Result.Success -> {
-                        // Show Result
-                        println("Result of Asynchronous Process : " + String(response.data))
-                    }
-                    is Result.Failure -> {
-                        println("Connection Failure")
-                    }
+            //===============================    JSON Purser    ===============================
+            val json = String(response.data)
+            return json
+        }
+
+        override fun onPostExecute(result: String?) {
+            super.onPostExecute(result)
+
+            //Complicated Json must be used <String, Any>
+            var map: Map<String, Any> = HashMap<String, Any>()
+            val mapper = jacksonObjectMapper()
+
+            map = mapper.readValue(result, object : TypeReference<HashMap<String, Any>>() {
+
+            })
+
+            latestMap = HashMap(map)
+        }
+    }
+
+    /*
+     * Network access should be handled outside of Main
+     * otherwise android.os.NetworkOnMainThreadException occur
+     */
+    inner class AsyncTaskGetAverage: AsyncTask<String, Void, String>() {
+
+        override fun doInBackground(vararg args: String): String? {
+
+            val (request, response, result) = args[0].httpGet().responseString()
+
+            when (result) {
+                is  Result.Success -> {
+                    // Show Result
+                    println("Result of Asynchronous Process : " + String(response.data))
                 }
-
-                //===============================    JSON Purser    ===============================
-                val json = String(response.data)
-
-                //Complicated Json must be used <String, Object>
-                var map: Map<String, Object> = HashMap<String, Object>()
-                val mapper = jacksonObjectMapper()
-
-                map = mapper.readValue(json, object : TypeReference<HashMap<String, Object>>() {
-
-                })
-
-                println("######################## : " + args[1])
-                periodMap = HashMap(map)
-                println(periodMap)
+                is Result.Failure -> {
+                    println("Connection Failure")
+                }
             }
 
+            //===============================    JSON Purser    ===============================
+            val json = String(response.data)
+            return json
+        }
+
+        override fun onPostExecute(result: String?) {
+            super.onPostExecute(result)
+
+            //===============================    JSON Purser    ===============================
+            //Complicated Json must be used <String, Any>
+            var map: Map<String, Any> = HashMap<String, Any>()
+            val mapper = jacksonObjectMapper()
+
+            map = mapper.readValue(result, object : TypeReference<HashMap<String, Any>>() {
+
+            })
+
+            periodMap = HashMap(map)
+
+            println("【onPostExecute】 latestMap=" + latestMap)
+            println("【onPostExecute】 periodMap=" + periodMap)
+            println("####    ####    ####    ####    fun onPostExecute : ")
+
+
+        }
+    }
+
+    /*
+     * Network access should be handled outside of Main
+     * otherwise android.os.NetworkOnMainThreadException occur
+     */
+    inner class AsyncTaskGetChart: AsyncTask<String, Void, String>() {
+
+        override fun doInBackground(vararg args: String): String? {
             return null
         }
 
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
-//            val tview = findViewById<TextView>(R.id.mytext)
-//            tview.setText(result)
+
+            //===============================    FOR GRAPH    ===============================
+            val selected:  ArrayList<String>
+
+            val chart = radar_chart
+
+            var xLabels:  List<String> = getSelectedCurrency()
+
+            val yLabels = ArrayList<String>()
+            yLabels.add("")
+            yLabels.add("90%")
+            yLabels.add("95%")
+            yLabels.add("100%")
+            yLabels.add("105%")
+            yLabels.add("110%")
+            yLabels.add("115%")
+
+
+
+
+            //表示データ取得
+            chart.data = RadarData(getRadarData())
+
+
+            //グラフ上の表示
+            chart.apply {
+
+                chart.invalidate()//チャートの表示を更新したいときに呼ぶ
+                chart.setDrawWeb(true)
+                chart.webLineWidth = 3f
+                chart.description.isEnabled = true
+                chart.description.text = "こういうこと"
+                chart.isClickable = true
+                chart.legend.isEnabled = true //凡例
+                animateY(1800, Easing.EasingOption.Linear)
+                chart.isRotationEnabled = false//ドラックすると回転するので制御する
+
+                chart.xAxis.setValueFormatter(IndexAxisValueFormatter(xLabels))
+//            chart.yAxis.setValueFormatter(IndexAxisValueFormatter(yLabels))
+
+
+
+
+                chart.yAxis.labelPosition.ordinal.and(0)
+                chart.yAxis.labelPosition.ordinal.and(1)
+                chart.yAxis.labelPosition.ordinal.and(3)
+                chart.yAxis.labelPosition.ordinal.and(2)
+
+                chart.yAxis.setDrawLabels(true)//値の目盛表記
+                chart.yAxis.labelCount=6
+
+//            chart.scaleX = 1f //X方向の表示倍率
+//            chart.scaleY = 1f //Y方向の表示倍率
+
+            }
+
+
 
         }
     }
+
+
+
 
     private fun getLatestUrl(): String {
 
@@ -285,14 +312,14 @@ class MainActivity : AppCompatActivity() {
         //===============================    HTTP Process    ===============================
         var latestURL: String = "https://api.exchangeratesapi.io/latest"
 
-        var base = sharedPref.getString("base","")
-        var selected = sharedPref.getString("selected","")
+        val base = sharedPref.getString("base","")
+        val selected = sharedPref.getString("selected","")
 
         if (base.isNullOrEmpty()) {
             //for the first time before SharedPreferences have set
             editor.putString("base", "USD")
             editor.putString("selected", "EUR,GBP,JPY,CNY")
-            editor.commit()
+            editor.apply()
 
             latestURL = latestURL + "?base=" + "USD" + "&symbols=EUR,GBP,JPY,CNY"
         } else {
@@ -314,9 +341,9 @@ class MainActivity : AppCompatActivity() {
 
         // setting file
         val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        var editor = sharedPref.edit()
-        var base = sharedPref.getString("base","USD")
-        var selected = sharedPref.getString("selected","EUR,GBP,JPY,CNY")
+//        var editor = sharedPref.edit()
+        val base = sharedPref.getString("base","USD")
+        val selected = sharedPref.getString("selected","EUR,GBP,JPY,CNY")
 
         var periodURL: String = "https://api.exchangeratesapi.io/history"
         periodURL = periodURL + "?start_at=" + startDate + "&end_at=" + endDate
@@ -332,19 +359,19 @@ class MainActivity : AppCompatActivity() {
      */
     private fun getSelectedCurrency(): List<String> {
 
-        val defautStr: String = "EUR,GBP,JPY,CNY"
+        val defaultStr: String = "EUR,GBP,JPY,CNY"
         // setting file
         val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        var editor = sharedPref.edit()
-        var selected = sharedPref.getString("selected","")
+        val editor = sharedPref.edit()
+        val selected = sharedPref.getString("selected","")
 
         val items: List<String>
         if (selected.isNullOrEmpty()) {
             //for the first time before SharedPreferences have set
-            editor.putString("selected", defautStr)
-            editor.commit()
+            editor.putString("selected", defaultStr)
+            editor.apply()
 
-            items = getItems(defautStr)
+            items = getItems(defaultStr)
         } else {
             items = getItems(selected)
 
@@ -354,14 +381,8 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun getItems(str: String): List<String> {
-
-
-//        val items:ArrayList<String> = str.split(",")
-//        val itemss = arrayListOf(str.split(","))
-        val items = str.split(",")
-
-
-        return items
+//        val items = str.split(",")
+        return str.split(",")
     }
 
 
@@ -417,15 +438,31 @@ class MainActivity : AppCompatActivity() {
     private fun getRadarData(): ArrayList<IRadarDataSet> {
         //表示させるデータ
 
-        val current = floatArrayOf(1.02f, 0.96f, 0.93f, 1.05f, 0.95f, 0.96f)
-        val entries = ArrayList<RadarEntry>().apply {
-            add(RadarEntry(current[0], 0))
-            add(RadarEntry(current[1], 1))
-            add(RadarEntry(current[2], 2))
-            add(RadarEntry(current[3], 3))
-            add(RadarEntry(current[4], 4))
-            add(RadarEntry(current[5], 5))
+        println("&%&%&%&%&%&%&%    6565&%&%&%& : latestMap.get(\"rates\") : " + latestMap.get("rates"))
 
+        val currencyList: List<String> = getSelectedCurrency()
+
+        val rateMap = latestMap.get("rates") as HashMap<String, Double>
+        println("&%&%&%&%&%&%&%    6565&%&%&%& : rateMap.get(\"EUR\") : " + rateMap.get("EUR"))
+        println("&%&%&%&%&%&%&%    6565&%&%&%& : rateMap.get(\"GBP\") : " + rateMap.get("GBP"))
+        println("&%&%&%&%&%&%&%    6565&%&%&%& : rateMap.get(\"JPY\") : " + rateMap.get("JPY"))
+        println("&%&%&%&%&%&%&%    6565&%&%&%& : rateMap.get(\"CNY\") : " + rateMap.get("CNY"))
+
+        val latest: MutableList<Double> = mutableListOf()
+        currencyList.forEach {
+            val dbl : Double? = rateMap.get(it)
+            if (dbl != null)
+                latest.add(dbl)
+            println("the element at $it " + dbl)
+        }
+
+
+        println("latest" + latest.size)
+        var entries = ArrayList<RadarEntry>().apply {
+            for ((index, value) in latest.withIndex()) {
+                add(RadarEntry(value.toFloat(), index))
+                println("the value at $index is $value")
+            }
         }
 
         val average = floatArrayOf(1f, 1f, 1f, 1f, 1f, 1f)
