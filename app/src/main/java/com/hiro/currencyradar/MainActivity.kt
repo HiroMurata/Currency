@@ -31,6 +31,12 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var textMessage: TextView
 
+    // Get rate
+    var latestMap: Map<String, Any> = HashMap<String, Any>()
+    var periodMap: Map<String, Any> = HashMap<String, Any>()
+    var selectedCurrencyList: List<String> = ArrayList()
+
+
     private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
@@ -82,7 +88,10 @@ class MainActivity : AppCompatActivity() {
                 return@OnNavigationItemSelectedListener true
             }
 
-//ボタンナビゲーションに幅的に５個までしか表示できないのであとで対応
+//ボタンナビゲーションに幅的に５個までしか表示できないのであとで対応 →３～５個というのが仕様
+// ２個か６個以上はヘッダータブかドロワーを使うことがGoogleによって推奨
+// https://medium.com/nextbeat-engineering/android%E3%82%A2%E3%83%97%E3%83%AA%E3%81%B8%E3%81%AEbottom-navigation%E3%81%AE%E5%B0%8E%E5%85%A5-872c17b21278
+            //
 //            R.id.usd -> {
 //                textMessage.setText(R.string.usd)
 //                return@OnNavigationItemSelectedListener true
@@ -91,10 +100,6 @@ class MainActivity : AppCompatActivity() {
         }
         false
     }
-
-    // Get rate
-    var latestMap: Map<String, Any> = HashMap<String, Any>()
-    var periodMap: Map<String, Any> = HashMap<String, Any>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -111,31 +116,19 @@ class MainActivity : AppCompatActivity() {
         textMessage = findViewById(R.id.message)
         navViewTerm.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
 
+        selectedCurrencyList = getSelectedCurrency()
+
         // Generate URL
         val latestUrl: String = getLatestUrl()
         val periodUrl: String = getPeriodUrl()
 
-        println("★ ★ ★ ★ ★  非同期の前: ")
+        println("【latestUrl】 : $latestUrl")
+        println("【periodUrl】 : $periodUrl")
 
         //Async
         AsyncTaskGetLatest().execute(latestUrl)
         AsyncTaskGetAverage().execute(periodUrl)
         AsyncTaskGetChart().execute()
-
-        println("★ ★ ★ ★ ★  非同期のあと １: ")
-
-
-        // TODO Latestのデータを解析？
-        //Get target currencies and set to Label of xAxis
-
-
-        val current = doubleArrayOf(1.02, 0.96, 0.93, 1.05, 0.95, 0.96)
-
-
-        // TODO 平均のデータを解析？
-        println("★ ★ ★ ★ ★  非同期のあと ２: ")
-
-
 
     }
 
@@ -218,12 +211,6 @@ class MainActivity : AppCompatActivity() {
             })
 
             periodMap = HashMap(map)
-
-            println("【onPostExecute】 latestMap=" + latestMap)
-            println("【onPostExecute】 periodMap=" + periodMap)
-            println("####    ####    ####    ####    fun onPostExecute : ")
-
-
         }
     }
 
@@ -245,19 +232,13 @@ class MainActivity : AppCompatActivity() {
 
             val chart = radar_chart
 
-            var xLabels:  List<String> = getSelectedCurrency()
-
-            val yLabels = ArrayList<String>()
-            yLabels.add("")
-            yLabels.add("90%")
-            yLabels.add("95%")
-            yLabels.add("100%")
-            yLabels.add("105%")
-            yLabels.add("110%")
-            yLabels.add("115%")
-
-
-
+//            val yLabels = ArrayList<String>()
+//            yLabels.add("")
+//            yLabels.add("0.90")
+//            yLabels.add("0.95")
+//            yLabels.add("1.00")
+//            yLabels.add("1.05")
+//            yLabels.add("1.10")
 
             //表示データ取得
             chart.data = RadarData(getRadarData())
@@ -268,63 +249,64 @@ class MainActivity : AppCompatActivity() {
 
                 chart.invalidate()//チャートの表示を更新したいときに呼ぶ
                 chart.setDrawWeb(true)
-                chart.webLineWidth = 3f
-                chart.description.isEnabled = true
+
+//                chart.setBackgroundColor(Color.rgb(60, 65, 82));
+                chart.setWebLineWidth(1f);
+//                chart.setWebColor(Color.LTGRAY);
+                chart.setWebLineWidthInner(1f);
+                chart.setWebColorInner(Color.LTGRAY);
+                chart.setWebAlpha(500); //Webの色の濃さ？
+
+                chart.description.isEnabled = true // descriptionを表示する
                 chart.description.text = "こういうこと"
                 chart.isClickable = true
                 chart.legend.isEnabled = true //凡例
-                animateY(1800, Easing.EasingOption.Linear)
+                animateY(1200, Easing.EasingOption.Linear)
                 chart.isRotationEnabled = false//ドラックすると回転するので制御する
 
-                chart.xAxis.setValueFormatter(IndexAxisValueFormatter(xLabels))
-//            chart.yAxis.setValueFormatter(IndexAxisValueFormatter(yLabels))
+                chart.xAxis.setValueFormatter(IndexAxisValueFormatter(selectedCurrencyList))
+//                chart.yAxis.setValueFormatter(IndexAxisValueFormatter(yLabels))
 
 
+//                chart.yAxis.setTypeface(tfLight);
+                chart.yAxis.setLabelCount(10, true);
+                chart.yAxis.setTextSize(12f);
+//                chart.yAxis.setAxisMinimum(0.7f);
+//                chart.yAxis.setAxisMaximum(1.3f);
 
 
                 chart.yAxis.labelPosition.ordinal.and(0)
-                chart.yAxis.labelPosition.ordinal.and(1)
-                chart.yAxis.labelPosition.ordinal.and(3)
+//                chart.yAxis.labelPosition.ordinal.and(1)
                 chart.yAxis.labelPosition.ordinal.and(2)
+                chart.yAxis.labelPosition.ordinal.and(-1)
 
                 chart.yAxis.setDrawLabels(true)//値の目盛表記
-                chart.yAxis.labelCount=6
+//                chart.yAxis.labelCount=10 //？？？不明
 
-//            chart.scaleX = 1f //X方向の表示倍率
-//            chart.scaleY = 1f //Y方向の表示倍率
+                chart.scaleX = 0.95f //X方向の表示倍率
+                chart.scaleY = 0.95f //Y方向の表示倍率
 
             }
-
-
-
         }
     }
-
-
 
 
     private fun getLatestUrl(): String {
 
         // setting file
         val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        var editor = sharedPref.edit()
-
-        //===============================    HTTP Process    ===============================
-        var latestURL: String = "https://api.exchangeratesapi.io/latest"
-
         val base = sharedPref.getString("base","")
-        val selected = sharedPref.getString("selected","")
 
-        if (base.isNullOrEmpty()) {
-            //for the first time before SharedPreferences have set
-            editor.putString("base", "USD")
-            editor.putString("selected", "EUR,GBP,JPY,CNY")
-            editor.apply()
+        var latestURL: String = getString(R.string.latest_url)
 
-            latestURL = latestURL + "?base=" + "USD" + "&symbols=EUR,GBP,JPY,CNY"
-        } else {
-            latestURL = latestURL + "?base=" + base + "&symbols=" + selected
+        var str = ""
+        selectedCurrencyList.forEachIndexed { index, value ->
+            when (index == 0) {
+                true  -> str += "$value"
+                false -> str += ",$value"
+            }
         }
+        latestURL = "$latestURL?base=$base&symbols=$str"
         return latestURL
     }
 
@@ -341,14 +323,18 @@ class MainActivity : AppCompatActivity() {
 
         // setting file
         val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-//        var editor = sharedPref.edit()
         val base = sharedPref.getString("base","USD")
-        val selected = sharedPref.getString("selected","EUR,GBP,JPY,CNY")
 
-        var periodURL: String = "https://api.exchangeratesapi.io/history"
-        periodURL = periodURL + "?start_at=" + startDate + "&end_at=" + endDate
-        periodURL = periodURL + "&base=" + base
-        periodURL = periodURL + "&symbols=" + selected
+        var str = ""
+        selectedCurrencyList.forEachIndexed { index, value ->
+            when (index == 0) {
+                true  -> str += "$value"
+                false -> str += ",$value"
+            }
+        }
+
+        var periodURL: String = getString(R.string.period_url)
+        periodURL = "$periodURL?start_at=$startDate&end_at=$endDate&base=$base&symbols=$str"
 
         return periodURL
     }
@@ -365,7 +351,7 @@ class MainActivity : AppCompatActivity() {
         val editor = sharedPref.edit()
         val selected = sharedPref.getString("selected","")
 
-        val items: List<String>
+        var items: List<String>
         if (selected.isNullOrEmpty()) {
             //for the first time before SharedPreferences have set
             editor.putString("selected", defaultStr)
@@ -375,6 +361,9 @@ class MainActivity : AppCompatActivity() {
         } else {
             items = getItems(selected)
 
+            // remove base from selected just in case
+            val base = sharedPref.getString("base","")
+            items = items.minus(base)
         }
         return items
     }
@@ -434,54 +423,90 @@ class MainActivity : AppCompatActivity() {
 
 
 
-
-    private fun getRadarData(): ArrayList<IRadarDataSet> {
-        //表示させるデータ
-
-        println("&%&%&%&%&%&%&%    6565&%&%&%& : latestMap.get(\"rates\") : " + latestMap.get("rates"))
-
-        val currencyList: List<String> = getSelectedCurrency()
-
+    private fun getLatestRate(): ArrayList<Float> {
+        val latest: ArrayList<Float> = arrayListOf()
         val rateMap = latestMap.get("rates") as HashMap<String, Double>
-        println("&%&%&%&%&%&%&%    6565&%&%&%& : rateMap.get(\"EUR\") : " + rateMap.get("EUR"))
-        println("&%&%&%&%&%&%&%    6565&%&%&%& : rateMap.get(\"GBP\") : " + rateMap.get("GBP"))
-        println("&%&%&%&%&%&%&%    6565&%&%&%& : rateMap.get(\"JPY\") : " + rateMap.get("JPY"))
-        println("&%&%&%&%&%&%&%    6565&%&%&%& : rateMap.get(\"CNY\") : " + rateMap.get("CNY"))
 
-        val latest: MutableList<Double> = mutableListOf()
-        currencyList.forEach {
+        selectedCurrencyList.forEach {
             val dbl : Double? = rateMap.get(it)
             if (dbl != null)
-                latest.add(dbl)
+                latest.add(dbl.toFloat())
             println("the element at $it " + dbl)
         }
+        return latest
+    }
 
+    private fun getAverageRate(): ArrayList<Float> {
 
-        println("latest" + latest.size)
-        var entries = ArrayList<RadarEntry>().apply {
-            for ((index, value) in latest.withIndex()) {
-                add(RadarEntry(value.toFloat(), index))
-                println("the value at $index is $value")
+        // HashMap like  2019-07-26 : {EUR=0.897827258, CNY=6.8781648411, JPY=108.6909678578, GBP=0.8047495062}
+        val dailyMap = periodMap.get("rates") as HashMap<String, Any>
+        println("&%&%&%&%&%&%&%    ★ ★ ★ ★ ★ ★& : dailyMap : " + dailyMap)
+        println("&%&%&%&%&%&%&%    ★ ★ ★ ★ ★ ★& : dailyMap サイズ: " + dailyMap.size)
+
+        var rateSumArray = DoubleArray(selectedCurrencyList.size)
+        var rateSumMap : HashMap<String, Double> = HashMap()
+        selectedCurrencyList.forEach {
+            // initialize rateSumMap with selected currency and value 0.0
+            rateSumMap = hashMapOf(it to 0.0)
+        }
+
+        // Get Sum amount for each currency by using HashMap
+        for ((k, v) in dailyMap) {
+        // dailyMap as key: currency, value: value. such like  2019-07-31 : {EUR=0.89678, CNY=6.80347, ....}, 2019-08-02 : {EUR=0.90041, CNY=6.938694, ....}
+            println("\n☆☆☆ dailyMap : $k : $v")
+
+            @Suppress("UNCHECKED_CAST")
+            val oneDayMap = v as HashMap<String, Double>
+            // oneDayMap as key: currency : value: value. such like EUR=0.897827258, CNY=6.8781648411, JPY=108.6909678578, GBP=0.8047495062
+
+            var dbl : Double = 0.0
+            selectedCurrencyList.forEach {
+                dbl = rateSumMap[it]?: 0.0
+                dbl += oneDayMap[it]?: 0.0
+                rateSumMap[it] = dbl
             }
         }
 
-        val average = floatArrayOf(1f, 1f, 1f, 1f, 1f, 1f)
-        val entries2 = ArrayList<RadarEntry>().apply {
-            add(RadarEntry(average[0], 0))
-            add(RadarEntry(average[1], 1))
-            add(RadarEntry(average[2], 2))
-            add(RadarEntry(average[3], 3))
-            add(RadarEntry(average[4], 4))
-            add(RadarEntry(average[5], 5))
+        println("\n☆☆☆ ☆☆☆☆☆☆ rateSumMap サイズ: ${rateSumMap.size}")
+        var returnList: ArrayList<Float> = ArrayList()
+        selectedCurrencyList.forEach {
+            println("\n☆☆☆ ☆☆☆☆☆☆ rateSumMap[it] : $rateSumMap[it]")
+            returnList.add((rateSumMap[it]?.toFloat() ?: 0f) / dailyMap.size)
+
+        }
+        return returnList
+    }
+
+
+    private fun getRadarData(): ArrayList<IRadarDataSet> {
+
+        // make average radar with 1.0f
+        val averageEntries = ArrayList<RadarEntry>().apply {
+            for (index in selectedCurrencyList.indices) {
+                add(RadarEntry(1.0f, index))
+            }
         }
 
+        // Compare with latest rate and average rate, then show radar chart
+        val latestRate= getLatestRate()
+        val averageRate= getAverageRate()
 
-        val dataSet = RadarDataSet(entries, "current")
+        val latestEntries = ArrayList<RadarEntry>().apply {
+            for (index in selectedCurrencyList.indices) {
+                println("★  ★  ★ 【averageRate[$index]】" + averageRate[index])
+                println("★  ★  ★ 【latestRate[$index]】" + latestRate[index])
+                var value = latestRate[index]/averageRate[index]
+                add(RadarEntry(value, index))
+                println("            ■ □ ■ □ グラフに埋め込む値[$index]【$value】")
+            }
+        }
+
+        val dataSet = RadarDataSet(latestEntries, "Latest")
         dataSet.apply {
             //整数で表示
-            valueFormatter = IValueFormatter { value, _, _, _ -> "" + value.toInt() }
+//            valueFormatter = IValueFormatter { value, _, _, _ -> "" + value.toInt() }
             //塗りつぶし
-            setDrawFilled(true)
+            setDrawFilled(false)
             fillColor = Color.BLUE
 
             //ハイライト
@@ -489,29 +514,27 @@ class MainActivity : AppCompatActivity() {
             highLightColor = Color.BLUE
             //B色をセット
 //                setColors(intArrayOf(R.color.material_blue, R.color.material_green, R.color.material_yellow), this@MainActivity)
-            color = Color.BLUE
+            color = Color.rgb(0,0,200)
 //                setColor(R.color.material_yellow)
         }
 
-        val dataSet2 = RadarDataSet(entries2, "avarage").apply {
+        val dataSet2 = RadarDataSet(averageEntries, "Average").apply {
             //整数で表示
 //                valueFormatter = IValueFormatter { value, _, _, _ -> "" + value.toInt() }
             //塗りつぶし
-            setDrawFilled(true)
+            setDrawFilled(false)
             fillColor = Color.RED
 
             //ハイライトさせない
-            isHighlightEnabled = false
+            isHighlightEnabled = true
             //色をセット
 //                setColors(intArrayOf(R.color.material_blue), this@MainActivity)
 //                setColor(R.color.material_blue)
 //                color = R.color.material_blue
             highLightColor = Color.RED
-            color = Color.RED
+            color = Color.rgb(255,0,255)
 
         }
-
-
 
         val radarDataSets = ArrayList<IRadarDataSet>()
         radarDataSets.add(dataSet)
@@ -520,10 +543,6 @@ class MainActivity : AppCompatActivity() {
 
         return radarDataSets
     }
-
-
-
-
 
 
 }

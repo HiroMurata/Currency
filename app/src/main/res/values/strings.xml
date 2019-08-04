@@ -15,4 +15,7 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dash</string>
     <string name="title_notifications">JPY</string>
+    <string name="latest_url">https://api.exchangeratesapi.io/latest</string>
+    <string name="period_url">https://api.exchangeratesapi.io/history</string>
+    <string name="comparison_currency">USD,EUR,GBP,JPY,CNY,SGD,MYR,AUD,NZD,CAD,HKD,CHF,RUB,PHP,IDR,INR,THB,KRW</string>
 </resources>
