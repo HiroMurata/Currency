@@ -2,7 +2,7 @@
     <string name="app_name">Radar Chart</string>
     <string name="setting">Setting</string>
     <string name="save">Save Settings</string>
-    <string name="base">Base Currency</string>
+    <string name="base_currency">Base Currency: </string>
     <string name="term">Term</string>
     <string name="comparison">Comparison Currencies</string>
     <string name="usd">USD</string>
@@ -12,6 +12,8 @@
     <string name="sgd">SGD</string>
     <string name="cny">CNY</string>
     <string name="cad">CAD</string>
+    <string name="init_currency">USD</string>
+    <string name="init_targets">EUR,GBP,JPY,CNY</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dash</string>
     <string name="title_notifications">JPY</string>

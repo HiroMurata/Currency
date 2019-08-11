@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+    <currency id="0" country="USA">USD</currency>
+    <currency id="1" country="Europe">EUR</currency>
+    <currency id="2" country="China">CNY</currency>
+    <currency id="3" country="United Kingdom">GBP</currency>
+    <currency id="4" country="JAPAN">JPY</currency>
+    <currency id="5" country="MALAYSIA">MYR</currency>
+    <currency id="6" country="Singapore">SGD</currency>
+    <currency id="7" country="Australia">AUD</currency>
+    <currency id="8" country="New Zealand">NZD</currency>
+    <currency id="9" country="Canada">CAD</currency>
+    <currency id="10" country="Hong Kong">HKD</currency>
+    <currency id="11" country="Switzerland">CHF</currency>
+    <currency id="12" country="Russia">RUB</currency>
+    <currency id="13" country="Philippines">PHP</currency>
+    <currency id="14" country="Indonesia">IDR</currency>
+    <currency id="15" country="India">INR</currency>
+    <currency id="16" country="Thailand">THB</currency>
+    <currency id="17" country="Korea">KRW</currency>
+-->
+</resources>

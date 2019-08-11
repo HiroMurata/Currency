@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-
 <android.support.constraint.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -12,7 +10,7 @@
 
     <com.github.mikephil.charting.charts.RadarChart
             android:id="@+id/radar_chart"
-            android:layout_width="395dp"
+            android:layout_width="match_parent"
             android:layout_height="450dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -21,7 +19,6 @@
             app:layout_constraintBottom_toTopOf="@+id/button"
             app:layout_constraintVertical_bias="0.0"
             android:layout_marginTop="8dp"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"
     />
 
     <TextView
@@ -39,53 +36,17 @@
 
     <android.support.design.widget.BottomNavigationView
             app:menu="@menu/bottom_nav_menu"
-            android:id="@+id/nav_view_term"
+            android:id="@+id/nav_view_main"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:background="?android:attr/windowBackground"
-            android:layout_marginEnd="8dp"
+            app:labelVisibilityMode="labeled"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginRight="8dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button"
+            app:layout_constraintBottom_toBottomOf="parent"/>
     />
 
-    <Button
-            android:id="@+id/button"
-            android:text="Back"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintHorizontal_bias="0.05"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/radar_chart"
-            app:layout_constraintBottom_toTopOf="@+id/nav_view_term"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"/>
-    <android.support.constraint.Barrier android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                        android:id="@+id/barrier" app:barrierDirection="left"/>
-    <android.support.constraint.Guideline android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                          android:id="@+id/guideline"
-                                          android:orientation="vertical" app:layout_constraintGuide_end="391dp"/>
-    <android.support.constraint.Layer android:layout_width="wrap_content"
-                                      android:layout_height="wrap_content"
-                                      android:id="@+id/layer" android:layout_marginBottom="8dp"
-                                      app:layout_constraintBottom_toBottomOf="@+id/text_view"/>
 
-    <!--
-    <Button
-            android:id="@+id/button"
-            android:layout_width="395dp"
-            android:layout_height="wrap_content"
-            android:textSize="30sp"
-            android:textColor="#0000aa"
-            android:text="@string/setting"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintVertical_bias="0.0"
-            app:layout_constraintHorizontal_bias="1.0"/>
--->
+
 
 </android.support.constraint.ConstraintLayout>

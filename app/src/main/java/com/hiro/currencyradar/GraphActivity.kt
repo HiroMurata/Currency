@@ -26,7 +26,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 
-class MainActivity : AppCompatActivity() {
+class GraphActivity : AppCompatActivity() {
 
     private lateinit var textMessage: TextView
 
@@ -41,7 +41,6 @@ class MainActivity : AppCompatActivity() {
 
         when (item.itemId) {
             R.id.navigation_base -> {
-//                textMessage.setText(R.string.usd)
 
                 Log.d("MainActivity: onCreate", "Button Home Clicked!")
                 val intent = Intent(this, SelectBaseActivity::class.java)
@@ -50,7 +49,6 @@ class MainActivity : AppCompatActivity() {
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_term -> {
-//                textMessage.setText(R.string.eur)
 
                 Log.d("MainActivity: onCreate", "Button Term Clicked!")
                 val intent = Intent(this, SelectTermActivity::class.java)
@@ -59,7 +57,6 @@ class MainActivity : AppCompatActivity() {
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_target -> {
-//                textMessage.setText(R.string.jpy)
 
                 Log.d("MainActivity: onCreate", "Button Target Clicked!")
                 val intent = Intent(this, SelectTargetActivity::class.java)
@@ -67,26 +64,6 @@ class MainActivity : AppCompatActivity() {
 
                 return@OnNavigationItemSelectedListener true
             }
-            R.id.navigation_graph -> {
-//                textMessage.setText(R.string.jpy)
-
-                Log.d("MainActivity: onCreate", "Button Graph Clicked!")
-                val intent = Intent(this, GraphActivity::class.java)
-                startActivity(intent)
-
-                return@OnNavigationItemSelectedListener true
-            }
-
-
-//ボタンナビゲーションに幅的に５個までしか表示できないのであとで対応 →３～５個というのが仕様
-// ２個か６個以上はヘッダータブかドロワーを使うことがGoogleによって推奨
-// https://medium.com/nextbeat-engineering/android%E3%82%A2%E3%83%97%E3%83%AA%E3%81%B8%E3%81%AEbottom-navigation%E3%81%AE%E5%B0%8E%E5%85%A5-872c17b21278
-            //
-//            R.id.usd -> {
-//                textMessage.setText(R.string.usd)
-//                return@OnNavigationItemSelectedListener true
-//            }
-
         }
         false
     }
@@ -94,14 +71,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_graph)
         val navViewTerm: BottomNavigationView = findViewById(R.id.nav_view_main)
 
-        button.setOnClickListener {
-            Log.d("MainActivity: onCreate", "Button Clicked!")
-            val intent = Intent(this, GraphActivity::class.java)
-            startActivity(intent)
-        }
 
 //        textMessage = findViewById(R.id.message)
         navViewTerm.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
@@ -114,11 +86,6 @@ class MainActivity : AppCompatActivity() {
 
         println("【latestUrl】 : $latestUrl")
         println("【periodUrl】 : $periodUrl")
-
-        //Async
-        AsyncTaskGetLatest().execute(latestUrl)
-        AsyncTaskGetAverage().execute(periodUrl)
-        AsyncTaskGetChart().execute()
 
     }
 
@@ -286,7 +253,7 @@ class MainActivity : AppCompatActivity() {
 
         // setting file
         val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val base = sharedPref.getString("base","USD")
+        val base = sharedPref.getString("base","")
 
         var latestURL: String = getString(R.string.latest_url)
 
@@ -314,7 +281,7 @@ class MainActivity : AppCompatActivity() {
 
         // setting file
         val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val base = sharedPref.getString("base",getString(R.string.init_currency))
+        val base = sharedPref.getString("base","USD")
 
         var str = ""
         selectedCurrencyList.forEachIndexed { index, value ->
@@ -336,26 +303,26 @@ class MainActivity : AppCompatActivity() {
      */
     private fun getSelectedCurrency(): List<String> {
 
-//        val defaultStr: String = getString(R.string.init_targets)
+        val defaultStr: String = "EUR,GBP,JPY,CNY"
         // setting file
         val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val editor = sharedPref.edit()
-        val selected : String = sharedPref.getString("selected", getString(R.string.init_targets))
+        val selected = sharedPref.getString("selected","")
 
         var items: List<String>
-//        if (selected.isNullOrEmpty()) {
-//            //for the first time before SharedPreferences have set
-//            editor.putString("selected", defaultStr)
-//            editor.apply()
-//
-//            items = getItems(defaultStr)
-//        } else {
+        if (selected.isNullOrEmpty()) {
+            //for the first time before SharedPreferences have set
+            editor.putString("selected", defaultStr)
+            editor.apply()
+
+            items = getItems(defaultStr)
+        } else {
             items = getItems(selected)
 
             // remove base from selected just in case
-            val base : String = sharedPref.getString("base","")
+            val base = sharedPref.getString("base","")
             items = items.minus(base)
-//        }
+        }
         return items
     }
 
