@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item id="us" png="us.png" country="USA" code="USD" >USD</item>
+    <item id="eu" png="eu.png" country="Europe" code="EUR" >EUR</item>
+    <item id="cn" png="cn.png" country="China" code="CNY" >CNY</item>
+    <item id="gb" png="gb.png" country="United Kingdom" code="GBP" >GBP</item>
+    <item id="jp" png="jp.png" country="JAPAN" code="JPY" >JPY</item>
+    <item id="my" png="my.png" country="MALAYSIA" code="MYR" >MYR</item>
+    <item id="sg" png="sg.png" country="Singapore" code="SGD" >SGD</item>
+    <item id="au" png="au.png" country="Australia" code="AUD" >AUD</item>
+    <item id="nz" png="nz.png" country="New Zealand" code="NZD" >NZD</item>
+    <item id="ca" png="ca.png" country="Canada" code="CAD" >CAD</item>
+    <item id="hk" png="hk.png" country="Hong Kong" code="HKD" >HKD</item>
+    <item id="ch" png="ch.png" country="Switzerland" code="CHF" >CHF</item>
+    <item id="ru" png="ru.png" country="Russia" code="RUB" >RUB</item>
+    <item id="ph" png="ph.png" country="Philippines" code="PHP" >PHP</item>
+    <item id="id" png="id.png" country="Indonesia" code="IDR" >IDR</item>
+    <item id="in" png="in.png" country="India" code="INR" >INR</item>
+    <item id="th" png="th.png" country="Thailand" code="THB" >THB</item>
+    <item id="kr" png="kr.png" country="Korea" code="KRW" >KRW</item>
+</resources>
