@@ -19,6 +19,7 @@ import org.xmlpull.v1.XmlPullParser
 
 class SelectBaseActivity : AppCompatActivity() {
 
+    private lateinit var listView: ListView
     private lateinit var textMessage: TextView
 //    private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
 //        when (item.itemId) {
@@ -49,6 +50,7 @@ class SelectBaseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_select_base)
+
 
         val imageView = findViewById<ImageView>(R.id.image_view)
         val assets = resources.assets
@@ -115,12 +117,7 @@ class SelectBaseActivity : AppCompatActivity() {
         // indicate app done reading the resource.
         xrp.close()
 
-        xmlElement.forEachIndexed { index, triple ->
-            System.out.println("☆XML")
-            System.out.println(xmlElement[index].first)
-            System.out.println(xmlElement[index].second)
-            System.out.println(xmlElement[index].third)
-        }
+
 
         // try-with-resources
         try {
@@ -138,6 +135,20 @@ class SelectBaseActivity : AppCompatActivity() {
             startActivity(intent)
 
         }
+
+        listView = findViewById<ListView>(R.id.listItems)
+        val listItems = arrayOfNulls<String>(xmlElement.size)
+
+        xmlElement.forEachIndexed { index, triple ->
+            System.out.println("☆XML")
+            System.out.println(xmlElement[index].first)
+            System.out.println(xmlElement[index].second)
+            System.out.println(xmlElement[index].third)
+            listItems[index] = xmlElement[index].second
+        }
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, listItems)
+        listView.adapter = adapter
 
 
     }
