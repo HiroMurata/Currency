@@ -5,20 +5,20 @@
 
     <ImageView
             android:id="@+id/image_view"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:contentDescription="country name"
             android:text="EU" />
 
     <TextView
             android:id="@+id/text_view_code"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:textSize="16dp"
             android:textColor="#0000aa"
-            android:text="code" />
+            android:text="" />
 
     <TextView
             android:id="@+id/text_view_name"
@@ -27,11 +27,11 @@
             android:layout_height="wrap_content"
             android:textSize="16dp"
             android:textColor="#0000aa"
-            android:text="CountryName"/>
+            android:text=""/>
 
 
     <CheckBox
-            android:id="@+id/checkbox1"
+            android:id="@+id/checkbox"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"

@@ -5,11 +5,10 @@ import android.content.res.XmlResourceParser
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.TextView
-import android.graphics.BitmapFactory
-import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.ListView
 import kotlinx.android.synthetic.main.activity_select_base.*
+import kotlinx.android.synthetic.main.table.*
 import org.xmlpull.v1.XmlPullParser
 
 
@@ -20,7 +19,6 @@ import org.xmlpull.v1.XmlPullParser
 class SelectBaseActivity : AppCompatActivity() {
 
     private lateinit var listView: ListView
-    private lateinit var textMessage: TextView
 //    private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
 //        when (item.itemId) {
 //            R.id.navigation_base -> {
@@ -52,104 +50,93 @@ class SelectBaseActivity : AppCompatActivity() {
         setContentView(R.layout.activity_select_base)
 
 
-        val imageView = findViewById<ImageView>(R.id.image_view)
-        val assets = resources.assets
-
-        val xrp :XmlResourceParser = getResources().getXml(R.xml.currencies)
-
-        // Xml Parser
+        // Parse XML and Retreive xml elements into ArrayList<Triple<png, code. country>>
+        val xpp :XmlResourceParser = getResources().getXml(R.xml.currencies)
         var xmlElement: ArrayList<Triple<String, String, String>> = ArrayList()
-        var eventType = xrp.getEventType()
-        while (eventType != XmlPullParser.END_DOCUMENT) {
+        var eventType = xpp.getEventType()
 
-            // instead of the following if/else if lines
-            // you should custom parse your xml
+        while (eventType != XmlPullParser.END_DOCUMENT) {
             when (eventType){
                 XmlPullParser.START_DOCUMENT -> {
                     println("Start document")
                 }
                 XmlPullParser.START_TAG -> {
-                    if (xrp.getName() == "item") {
+                    System.out.println("Start tag " + xpp.getName())
+                    if (xpp.getName() == "item") {
                         val tri: Triple<String, String, String> = Triple(
-                            xrp.getAttributeValue(null, "png"),
-                            xrp.getAttributeValue(null, "code"),
-                            xrp.getAttributeValue(null, "country"))
-
-                        System.out.println("Start tag " + xrp.getName())
-                        System.out.println("id " + xrp.getAttributeValue(null, "id"))
-                        System.out.println("code " + xrp.getAttributeValue(null, "code"))
-                        System.out.println("country " + xrp.getAttributeValue(null, "country"))
+                            xpp.getAttributeValue(null, "png"),
+                            xpp.getAttributeValue(null, "code"),
+                            xpp.getAttributeValue(null, "country"))
 
                         xmlElement.add(tri)
                     }
                 }
                 XmlPullParser.END_TAG -> {
-
+                }
+                XmlPullParser.TEXT -> {
+                    System.out.println("Text " + xpp.getText())
                 }
 
             }
-
-            if (eventType == XmlPullParser.START_DOCUMENT) {
-                println("Start document")
-            } else if (eventType == XmlPullParser.START_TAG) {
-
-                if (xrp.getName() == "item") {
-                    val tri: Triple<String, String, String> = Triple(
-                        xrp.getAttributeValue(null, "png"),
-                        xrp.getAttributeValue(null, "code"),
-                        xrp.getAttributeValue(null, "country"))
-
-                    System.out.println("Start tag " + xrp.getName())
-                    System.out.println("id " + xrp.getAttributeValue(null, "id"))
-                    System.out.println("code " + xrp.getAttributeValue(null, "code"))
-                    System.out.println("country " + xrp.getAttributeValue(null, "country"))
-
-                    xmlElement.add(tri)
-                }
-
-            } else if (eventType == XmlPullParser.END_TAG) {
-                System.out.println("End tag " + xrp.getName())
-            } else if (eventType == XmlPullParser.TEXT) {
-                System.out.println("Text " + xrp.getText())
-            }
-            eventType = xrp.nextToken()
+            eventType = xpp.next()
         }
         // indicate app done reading the resource.
-        xrp.close()
+        xpp.close()
+
+
+//        val imageView = findViewById<ImageView>(R.id.image_view)
+//        val assets = resources.assets
+
+//        // the way to get image filer from assets folder
+//        // try-with-resources
+//        try {
+//            resources.assets.open("images/eu.png").use { istream ->
+//                val bitmap = BitmapFactory.decodeStream(istream)
+//                image_view.setImageBitmap(bitmap)
+//            }
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//        }
 
 
 
-        // try-with-resources
-        try {
-            resources.assets.open("images/eu.png").use { istream ->
-                val bitmap = BitmapFactory.decodeStream(istream)
-                image_view.setImageBitmap(bitmap)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
 
-
-        button.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-
-        }
-
-        listView = findViewById<ListView>(R.id.listItems)
-        val listItems = arrayOfNulls<String>(xmlElement.size)
-
-        xmlElement.forEachIndexed { index, triple ->
-            System.out.println("☆XML")
-            System.out.println(xmlElement[index].first)
-            System.out.println(xmlElement[index].second)
-            System.out.println(xmlElement[index].third)
-            listItems[index] = xmlElement[index].second
-        }
-
-        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, listItems)
+        // Create ListView of Layout for this screen
+        listView = findViewById(R.id.listItems)
+        val adapter = ItemAdapter(this,  xmlElement)
         listView.adapter = adapter
 
 
+
+//        checkbox.setOnClickListener {
+////            System.out.println("★★ it=$it.id")
+//        }
+
+
+//        button.setOnClickListener {
+//            val intent = Intent(this, MainActivity::class.java)
+//            startActivity(intent)
+//
+//        }
+
+        listView.setOnItemClickListener { _, _, position, id ->
+            System.out.println("★★ position=$position")
+            System.out.println("★★ id=$id")
+            // 1
+            val selectedCurrency = xmlElement[position]
+
+            System.out.println("★★ Selected=$selectedCurrency.second")
+
+        }
+
+
     }
+
+
+
+
+//    private fun onCheckboxClicked (savedInstanceState: Bundle?){
+//
+//
+//    }
 }
