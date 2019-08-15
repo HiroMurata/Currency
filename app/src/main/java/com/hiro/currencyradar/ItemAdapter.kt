@@ -4,14 +4,12 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.BaseAdapter
-import android.widget.CheckBox
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import com.squareup.picasso.Picasso
 
 class ItemAdapter(private val context: Context,
-                  private val dataSource: ArrayList<Triple<String, String, String>>) : BaseAdapter() {
+                  private val dataSource: ArrayList<Triple<String, String, String>>,
+                    private val selectedPosition: Int) : BaseAdapter() {
 
     private val inflater: LayoutInflater
             = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -32,34 +30,76 @@ class ItemAdapter(private val context: Context,
      * this getView method  will be called repeatedly for dataSource(rows of currency.xml)
      */
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+
+
+/*
         // Get view for row item
-        val rowView = inflater.inflate(R.layout.table, parent, false)
+        val rowView = inflater.inflate(R.layout.list_item, parent, false)
 
         // for thumbnail element
-        val thumbnailImageView = rowView.findViewById(R.id.image_view) as ImageView
+        val thumbnailImageView = rowView.findViewById(R.id.imageView) as ImageView
 
         // for code element
-        val codeTextView = rowView.findViewById(R.id.text_view_code) as TextView
+        val codeTextView = rowView.findViewById(R.id.codeTextView) as TextView
 
         // for country name element
-        val countryNameTextView = rowView.findViewById(R.id.text_view_name) as TextView
+        val countryTextView = rowView.findViewById(R.id.countryTextView) as TextView
+*/
 
 
 
-        /*
-        """
-        https://www.raywenderlich.com/155-android-listview-tutorial-with-kotlin
-        Implement a ViewHolder Pattern のところ
-        """
-        */
+        val view: View
+        val holder: ViewHolder
 
+// 1
+        if (convertView == null) {
+
+            // 2
+            view = inflater.inflate(R.layout.list_item, parent, false)
+
+            // 3
+            holder = ViewHolder()
+            holder.thumbnailImageView = view.findViewById(R.id.imageView) as ImageView
+            holder.codeTextView = view.findViewById(R.id.codeTextView) as TextView
+            holder.countryTextView = view.findViewById(R.id.countryTextView) as TextView
+            holder.checkedTextView = view.findViewById(R.id.checkedTextView) as CheckedTextView
+
+            // 4
+            view.tag = holder
+        } else {
+            // 5
+            view = convertView
+            holder = convertView.tag as ViewHolder
+        }
+
+// 6
+        val codeTextView = holder.codeTextView
+        val countryTextView = holder.countryTextView
+        val checkedTextView = holder.checkedTextView
+        val thumbnailImageView = holder.thumbnailImageView
 
 
         // Get xml one row as Triple<png, code, country>
         val item = getItem(position) as Triple<String, String, String>
 
         codeTextView.text = item.second
-        countryNameTextView.text = item.third
+        countryTextView.text = item.third
+
+        when (selectedPosition == position) {
+            true -> {
+                System.out.println("□ ■ □ ■ □ ■ □ ■ ポジション一致")
+//                checkedTextView.setChecked(true)
+                holder.checkedTextView.setChecked(true)
+                checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_orange_24dp)
+
+            }
+            false -> {
+                System.out.println("▲ △ ▲ △ ▲ △ ▲ △ ポジション不致")
+//                checkedTextView.setChecked(false)
+                holder.checkedTextView.setChecked(false)
+                checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_outline_blank_black_24dp)
+            }
+        }
 
         val png = item.first
         System.out.println("file:///android_asset/$png")
@@ -67,14 +107,17 @@ class ItemAdapter(private val context: Context,
 
 
 
-
+/*
         return rowView
+*/
+        return view
+
     }
 
     private class ViewHolder {
         lateinit var thumbnailImageView: ImageView
         lateinit var codeTextView: TextView
         lateinit var countryTextView: TextView
-        lateinit var checkBox: CheckBox
+        lateinit var checkedTextView: CheckedTextView
     }
 }

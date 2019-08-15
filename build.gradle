@@ -23,9 +23,6 @@ allprojects {
         /* for MPAndroidChart */
         maven { url "https://jitpack.io" }
 
-        /* for get country flags */
-        maven { url "https://dl.bintray.com/mikefot/maven/" }
-
     }
 }
 

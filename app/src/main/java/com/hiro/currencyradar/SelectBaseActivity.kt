@@ -7,6 +7,10 @@ import android.os.Bundle
 import android.widget.TextView
 import android.widget.ImageView
 import android.widget.ListView
+import android.preference.PreferenceManager
+import android.content.SharedPreferences
+import android.util.SparseBooleanArray
+import android.view.View
 import kotlinx.android.synthetic.main.activity_select_base.*
 import kotlinx.android.synthetic.main.table.*
 import org.xmlpull.v1.XmlPullParser
@@ -98,12 +102,15 @@ class SelectBaseActivity : AppCompatActivity() {
 //            e.printStackTrace()
 //        }
 
+        // setting file
+        val base = getBaseFromSharedPreferences()
 
+        val basePosition = getBasePosition (xmlElement, base)
 
 
         // Create ListView of Layout for this screen
         listView = findViewById(R.id.listItems)
-        val adapter = ItemAdapter(this,  xmlElement)
+        val adapter = ItemAdapter(this,  xmlElement, basePosition)
         listView.adapter = adapter
 
 
@@ -112,31 +119,58 @@ class SelectBaseActivity : AppCompatActivity() {
 ////            System.out.println("★★ it=$it.id")
 //        }
 
+        listView.setOnItemClickListener { _, view, position, _ ->
 
-//        button.setOnClickListener {
-//            val intent = Intent(this, MainActivity::class.java)
-//            startActivity(intent)
-//
-//        }
 
-        listView.setOnItemClickListener { _, _, position, id ->
+
             System.out.println("★★ position=$position")
-            System.out.println("★★ id=$id")
+//            System.out.println("★★ id=$id")
             // 1
             val selectedCurrency = xmlElement[position]
 
             System.out.println("★★ Selected=$selectedCurrency.second")
+
+            // 再帰的に呼び出す
+            val adapter = ItemAdapter(this, xmlElement, position)
+            listView.adapter = adapter
+
 
         }
 
 
     }
 
+    private fun getBaseFromSharedPreferences() :String {
+        // setting file
+        val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        val base = sharedPref.getString("base","USD")
+        return base ?: "USD"
+
+    }
+
+
+    /*
+     *  Baseとして選択された通貨の位置を取得する
+     */
+    private fun getBasePosition(list: ArrayList<Triple<String, String, String>>, base: String) :Int {
+
+        list.forEachIndexed { index, value ->
+            if (base == value.second) {
+                return  index
+            }
+        }
+        return  0
+    }
 
 
 
-//    private fun onCheckboxClicked (savedInstanceState: Bundle?){
-//
-//
-//    }
+
+/*
+    private fun onRowClicked (savedInstanceState: Bundle?){
+        System.out.println("★★ position=$position")
+
+
+    }
+*/
+
 }
