@@ -50,14 +50,10 @@ class SelectTermActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_select_term)
 
-        button.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-
-        }
-
-        textMessage = findViewById(R.id.message)
-        navViewTerm.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
+        // BottomNaviView setting
+        val navView: BottomNavigationView = findViewById(R.id.nav_view_main)
+        navView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
+        navView.getMenu().findItem(R.id.navigation_term).setChecked(true)
 
     }
 }

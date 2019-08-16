@@ -307,12 +307,12 @@ class GraphActivity : AppCompatActivity() {
         // setting file
         val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val editor = sharedPref.edit()
-        val selected = sharedPref.getString("selected","")
+        val selected = sharedPref.getString("targets","")
 
         var items: List<String>
         if (selected.isNullOrEmpty()) {
             //for the first time before SharedPreferences have set
-            editor.putString("selected", defaultStr)
+            editor.putString("targets", defaultStr)
             editor.apply()
 
             items = getItems(defaultStr)

@@ -28,20 +28,16 @@ import kotlin.collections.HashMap
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var textMessage: TextView
-
     // Get rate
     var latestMap: Map<String, Any> = HashMap<String, Any>()
     var periodMap: Map<String, Any> = HashMap<String, Any>()
     var selectedCurrencyList: List<String> = ArrayList()
 
-
     private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-        val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+//        val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         when (item.itemId) {
             R.id.navigation_base -> {
-//                textMessage.setText(R.string.usd)
 
                 Log.d("MainActivity: onCreate", "Button Home Clicked!")
                 val intent = Intent(this, SelectBaseActivity::class.java)
@@ -50,7 +46,6 @@ class MainActivity : AppCompatActivity() {
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_term -> {
-//                textMessage.setText(R.string.eur)
 
                 Log.d("MainActivity: onCreate", "Button Term Clicked!")
                 val intent = Intent(this, SelectTermActivity::class.java)
@@ -59,7 +54,6 @@ class MainActivity : AppCompatActivity() {
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_target -> {
-//                textMessage.setText(R.string.jpy)
 
                 Log.d("MainActivity: onCreate", "Button Target Clicked!")
                 val intent = Intent(this, SelectTargetActivity::class.java)
@@ -68,7 +62,6 @@ class MainActivity : AppCompatActivity() {
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_graph -> {
-//                textMessage.setText(R.string.jpy)
 
                 Log.d("MainActivity: onCreate", "Button Graph Clicked!")
                 val intent = Intent(this, GraphActivity::class.java)
@@ -76,17 +69,6 @@ class MainActivity : AppCompatActivity() {
 
                 return@OnNavigationItemSelectedListener true
             }
-
-
-//ボタンナビゲーションに幅的に５個までしか表示できないのであとで対応 →３～５個というのが仕様
-// ２個か６個以上はヘッダータブかドロワーを使うことがGoogleによって推奨
-// https://medium.com/nextbeat-engineering/android%E3%82%A2%E3%83%97%E3%83%AA%E3%81%B8%E3%81%AEbottom-navigation%E3%81%AE%E5%B0%8E%E5%85%A5-872c17b21278
-            //
-//            R.id.usd -> {
-//                textMessage.setText(R.string.usd)
-//                return@OnNavigationItemSelectedListener true
-//            }
-
         }
         false
     }
@@ -95,18 +77,23 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_main)
-        val navViewTerm: BottomNavigationView = findViewById(R.id.nav_view_main)
+//        button.setOnClickListener {
+//            Log.d("MainActivity: onCreate", "Button Clicked!")
+//            val intent = Intent(this, GraphActivity::class.java)
+//            startActivity(intent)
+//        }
 
-        button.setOnClickListener {
-            Log.d("MainActivity: onCreate", "Button Clicked!")
-            val intent = Intent(this, GraphActivity::class.java)
-            startActivity(intent)
-        }
+        var textView = findViewById(R.id.codeTextView) as TextView
+        textView.text = getBaseCurrency()
 
-//        textMessage = findViewById(R.id.message)
-        navViewTerm.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
+        // BottomNaviView setting
+        val navView: BottomNavigationView = findViewById(R.id.nav_view_main)
+        navView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
+        navView.getMenu().findItem(R.id.navigation_radar).setChecked(true)
 
-        selectedCurrencyList = getSelectedCurrency()
+
+
+        selectedCurrencyList = getTargetCurrencies()
 
         // Generate URL
         val latestUrl: String = getLatestUrl()
@@ -330,32 +317,52 @@ class MainActivity : AppCompatActivity() {
         return periodURL
     }
 
+    /*
+     Get selected currencies from setting file
+     */
+    private fun getBaseCurrency(): String {
+
+        // setting file
+        val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        val editor = sharedPref.edit()
+        var base : String = sharedPref.getString("base", "")
+
+        if (base.isNullOrEmpty()) {
+            base = getString(R.string.init_currency)
+
+            //for the first time before SharedPreferences have set
+            editor.putString("base", base)
+            editor.apply()
+
+        }
+        return base
+    }
 
     /*
      Get selected currencies from setting file
      */
-    private fun getSelectedCurrency(): List<String> {
+    private fun getTargetCurrencies(): List<String> {
 
-//        val defaultStr: String = getString(R.string.init_targets)
         // setting file
         val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val editor = sharedPref.edit()
-        val selected : String = sharedPref.getString("selected", getString(R.string.init_targets))
+        val targets : String = sharedPref.getString("targets", "")
 
         var items: List<String>
-//        if (selected.isNullOrEmpty()) {
-//            //for the first time before SharedPreferences have set
-//            editor.putString("selected", defaultStr)
-//            editor.apply()
-//
-//            items = getItems(defaultStr)
-//        } else {
-            items = getItems(selected)
+        if (targets.isNullOrEmpty()) {
+            //for the first time before SharedPreferences have set
+            editor.putString("targets", getString(R.string.init_targets))
+            editor.apply()
 
-            // remove base from selected just in case
-            val base : String = sharedPref.getString("base","")
-            items = items.minus(base)
-//        }
+            items = getItems(getString(R.string.init_targets))
+        } else {
+            items = getItems(targets)
+
+        }
+        // remove base from selected just in case
+        val base : String = sharedPref.getString("base","")
+        items = items.minus(base)
+
         return items
     }
 

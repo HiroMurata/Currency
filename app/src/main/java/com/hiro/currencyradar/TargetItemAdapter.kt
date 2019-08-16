@@ -7,9 +7,12 @@ import android.view.ViewGroup
 import android.widget.*
 import com.squareup.picasso.Picasso
 
-class ItemAdapter(private val context: Context,
-                  private val dataSource: ArrayList<Triple<String, String, String>>,
-                    private val selectedPosition: Int) : BaseAdapter() {
+/*
+ * This Adapter is for getting Target Currencies
+ */
+class TargetItemAdapter(private val context: Context,
+                        private val dataSource: ArrayList<Triple<String, String, String>>,
+                        private val selectedPositionList: ArrayList<Int>) : BaseAdapter() {
 
     private val inflater: LayoutInflater
             = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -31,27 +34,10 @@ class ItemAdapter(private val context: Context,
      */
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
 
-
-/*
-        // Get view for row item
-        val rowView = inflater.inflate(R.layout.list_item, parent, false)
-
-        // for thumbnail element
-        val thumbnailImageView = rowView.findViewById(R.id.imageView) as ImageView
-
-        // for code element
-        val codeTextView = rowView.findViewById(R.id.codeTextView) as TextView
-
-        // for country name element
-        val countryTextView = rowView.findViewById(R.id.countryTextView) as TextView
-*/
-
-
-
         val view: View
         val holder: ViewHolder
 
-// 1
+        // 1
         if (convertView == null) {
 
             // 2
@@ -72,7 +58,7 @@ class ItemAdapter(private val context: Context,
             holder = convertView.tag as ViewHolder
         }
 
-// 6
+        // 6
         val codeTextView = holder.codeTextView
         val countryTextView = holder.countryTextView
         val checkedTextView = holder.checkedTextView
@@ -85,21 +71,28 @@ class ItemAdapter(private val context: Context,
         codeTextView.text = item.second
         countryTextView.text = item.third
 
-        when (selectedPosition == position) {
-            true -> {
-                System.out.println("□ ■ □ ■ □ ■ □ ■ ポジション一致")
+        selectedPositionList.forEach {
+            when (it == position) {
+                true -> {
+                    System.out.println("□ ■ □ ■ □ ■ □ ■ ポジション一致")
 //                checkedTextView.setChecked(true)
-                holder.checkedTextView.setChecked(true)
-                checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_orange_24dp)
-
-            }
-            false -> {
-                System.out.println("▲ △ ▲ △ ▲ △ ▲ △ ポジション不致")
-//                checkedTextView.setChecked(false)
-                holder.checkedTextView.setChecked(false)
-                checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_outline_blank_black_24dp)
+                    when (checkedTextView.isChecked) {
+                        true -> {
+                            checkedTextView.setChecked(false)
+                            checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_outline_blank_black_24dp)
+                        }
+                        false -> {
+                            checkedTextView.setChecked(true)
+                            checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_skyblue_24dp)
+                        }
+                    }
+                }
+                false -> {
+                    System.out.println("▲ △ ▲ △ ▲ △ ▲ △ ポジション不致")
+                }
             }
         }
+
 
         val png = item.first
         System.out.println("file:///android_asset/$png")

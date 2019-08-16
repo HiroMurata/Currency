@@ -1,8 +1,12 @@
 <resources>
     <string name="app_name">Radar Chart</string>
+    <string name="base_currency_select">Base Currency Selection</string>
+    <string name="target_currency_select">Comparison Currencies</string>
+    <string name="term_select">Term Selection</string>
     <string name="setting">Setting</string>
-    <string name="save">Save Settings</string>
-    <string name="base_currency">Base Currency: </string>
+    <string name="base">base</string>
+    <string name="base_currency">Base Currency :</string>
+    <string name="targets">targets</string>
     <string name="term">Term</string>
     <string name="comparison">Comparison Currencies</string>
     <string name="usd">USD</string>

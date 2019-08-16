@@ -12,14 +12,14 @@
             android:title="Base"/>
 
     <item
+        android:id="@+id/navigation_target"
+        android:icon="@drawable/ic_grid_on_black_24dp"
+        android:title="Target"/>
+
+    <item
             android:id="@+id/navigation_term"
             android:icon="@drawable/ic_event_available_black_24dp"
             android:title="Term"/>
-
-    <item
-            android:id="@+id/navigation_target"
-            android:icon="@drawable/ic_grid_on_black_24dp"
-            android:title="Target"/>
 
     <item
             android:id="@+id/navigation_graph"

@@ -4,15 +4,11 @@ import android.content.Intent
 import android.content.res.XmlResourceParser
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.TextView
-import android.widget.ImageView
 import android.widget.ListView
 import android.preference.PreferenceManager
 import android.content.SharedPreferences
-import android.util.SparseBooleanArray
-import android.view.View
-import kotlinx.android.synthetic.main.activity_select_base.*
-import kotlinx.android.synthetic.main.table.*
+import android.support.design.widget.BottomNavigationView
+import android.util.Log
 import org.xmlpull.v1.XmlPullParser
 
 
@@ -23,35 +19,38 @@ import org.xmlpull.v1.XmlPullParser
 class SelectBaseActivity : AppCompatActivity() {
 
     private lateinit var listView: ListView
-//    private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-//        when (item.itemId) {
-//            R.id.navigation_base -> {
-//                textMessage.setText(R.string.usd)
-//                return@OnNavigationItemSelectedListener true
-//            }
-//            R.id.navigation_term -> {
-//                textMessage.setText(R.string.eur)
-//                return@OnNavigationItemSelectedListener true
-//            }
-//            R.id.navigation_target -> {
-//                textMessage.setText(R.string.jpy)
-//                return@OnNavigationItemSelectedListener true
-//            }
-//
-//
-////ボタンナビゲーションに幅的に５個までしか表示できないのであとで対応
-////            R.id.usd -> {
-////                textMessage.setText(R.string.usd)
-////                return@OnNavigationItemSelectedListener true
-////            }
-//
-//        }
-//        false
-//    }
+
+    private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
+        when (item.itemId) {
+            R.id.navigation_radar -> {
+                Log.d("BaseActivity: onCreate", "Button Term Clicked!")
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+
+                return@OnNavigationItemSelectedListener true
+            }
+            R.id.navigation_target -> {
+                Log.d("BaseActivity: onCreate", "Button Target Clicked!")
+                val intent = Intent(this, SelectTargetActivity::class.java)
+                startActivity(intent)
+
+                return@OnNavigationItemSelectedListener true
+            }
+            R.id.navigation_term -> {
+                return@OnNavigationItemSelectedListener true
+            }
+        }
+        false
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_select_base)
+
+        // BottomNaviView setting
+        val navView: BottomNavigationView = findViewById(R.id.nav_view_main)
+        navView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
+        navView.getMenu().findItem(R.id.navigation_base).setChecked(true)
 
 
         // Parse XML and Retreive xml elements into ArrayList<Triple<png, code. country>>
@@ -80,7 +79,6 @@ class SelectBaseActivity : AppCompatActivity() {
                 XmlPullParser.TEXT -> {
                     System.out.println("Text " + xpp.getText())
                 }
-
             }
             eventType = xpp.next()
         }
@@ -110,28 +108,37 @@ class SelectBaseActivity : AppCompatActivity() {
 
         // Create ListView of Layout for this screen
         listView = findViewById(R.id.listItems)
-        val adapter = ItemAdapter(this,  xmlElement, basePosition)
+        val adapter = BaseItemAdapter(this,  xmlElement, basePosition)
         listView.adapter = adapter
 
 
 
-//        checkbox.setOnClickListener {
-////            System.out.println("★★ it=$it.id")
-//        }
-
         listView.setOnItemClickListener { _, view, position, _ ->
+
+            // 1
+            val selectedCurrency = xmlElement[position]
+
+
+            // save selected currency into shared file
+            val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+            val editor = sharedPref.edit()
+            val selected = sharedPref.getString(getString(R.string.base), selectedCurrency.second)?: getString(R.string.usd)
+
+            //for the first time before SharedPreferences have set
+            editor.putString(getString(R.string.base), selected)
+            editor.apply()
+
+
 
 
 
             System.out.println("★★ position=$position")
 //            System.out.println("★★ id=$id")
-            // 1
-            val selectedCurrency = xmlElement[position]
 
-            System.out.println("★★ Selected=$selectedCurrency.second")
+            System.out.println("★★ Selected=$selected")
 
             // 再帰的に呼び出す
-            val adapter = ItemAdapter(this, xmlElement, position)
+            val adapter = BaseItemAdapter(this, xmlElement, position)
             listView.adapter = adapter
 
 
@@ -165,12 +172,6 @@ class SelectBaseActivity : AppCompatActivity() {
 
 
 
-/*
-    private fun onRowClicked (savedInstanceState: Bundle?){
-        System.out.println("★★ position=$position")
 
-
-    }
-*/
 
 }
