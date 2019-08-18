@@ -346,12 +346,12 @@ class MainActivity : AppCompatActivity() {
         // setting file
         val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val editor = sharedPref.edit()
-        val targets : String = sharedPref.getString("targets", "")
+        val targets : String = sharedPref.getString("selected", "")
 
         var items: List<String>
         if (targets.isNullOrEmpty()) {
             //for the first time before SharedPreferences have set
-            editor.putString("targets", getString(R.string.init_targets))
+            editor.putString("selected", getString(R.string.init_targets))
             editor.apply()
 
             items = getItems(getString(R.string.init_targets))

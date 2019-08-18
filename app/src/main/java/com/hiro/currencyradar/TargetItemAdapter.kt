@@ -12,7 +12,7 @@ import com.squareup.picasso.Picasso
  */
 class TargetItemAdapter(private val context: Context,
                         private val dataSource: ArrayList<Triple<String, String, String>>,
-                        private val selectedPositionList: ArrayList<Int>) : BaseAdapter() {
+                        private val targetPositions: ArrayList<Int>) : BaseAdapter() {
 
     private val inflater: LayoutInflater
             = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -39,7 +39,6 @@ class TargetItemAdapter(private val context: Context,
 
         // 1
         if (convertView == null) {
-
             // 2
             view = inflater.inflate(R.layout.list_item, parent, false)
 
@@ -64,41 +63,24 @@ class TargetItemAdapter(private val context: Context,
         val checkedTextView = holder.checkedTextView
         val thumbnailImageView = holder.thumbnailImageView
 
-
         // Get xml one row as Triple<png, code, country>
         val item = getItem(position) as Triple<String, String, String>
 
         codeTextView.text = item.second
         countryTextView.text = item.third
 
-        selectedPositionList.forEach {
-            when (it == position) {
-                true -> {
-                    System.out.println("□ ■ □ ■ □ ■ □ ■ ポジション一致")
-//                checkedTextView.setChecked(true)
-                    when (checkedTextView.isChecked) {
-                        true -> {
-                            checkedTextView.setChecked(false)
-                            checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_outline_blank_black_24dp)
-                        }
-                        false -> {
-                            checkedTextView.setChecked(true)
-                            checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_skyblue_24dp)
-                        }
-                    }
-                }
-                false -> {
-                    System.out.println("▲ △ ▲ △ ▲ △ ▲ △ ポジション不致")
-                }
-            }
-        }
+        if (targetPositions.contains(position)) {
+            holder.checkedTextView.setChecked(true)
+            checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_skyblue_24dp)
 
+        } else {
+            holder.checkedTextView.setChecked(false)
+            checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_outline_blank_black_24dp)
+        }
 
         val png = item.first
         System.out.println("file:///android_asset/$png")
         Picasso.get().load("file:///android_asset/$png").into(thumbnailImageView)
-
-
 
 /*
         return rowView

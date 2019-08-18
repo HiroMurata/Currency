@@ -84,90 +84,87 @@ class SelectTargetActivity : AppCompatActivity() {
 
 
         // setting file
-        val targets = getTargetFromSharedPreferences()
+        var targetCodes = getTargetCodesFromSharedPreferences()
 
-        val basePosition = getBasePosition(xmlElement, targets)
+        val targetPositions = Utils.getTargetPositions(xmlElement, targetCodes)
 
 
         // Create ListView of Layout for this screen
         listView = findViewById(R.id.listItems)
-        val adapter = TargetItemAdapter(this,  xmlElement, basePosition)
+
+        xmlElement.forEachIndexed { index, triple ->
+            listView.setItemChecked(index, false)
+        }
+
+        targetPositions.forEach{index ->
+            listView.setItemChecked(index, true)
+        }
+
+
+        val adapter = TargetItemAdapter(this,  xmlElement, targetPositions)
         listView.adapter = adapter
-
-
 
         listView.setOnItemClickListener { _, view, position, _ ->
 
-/*
-チェックボックスのON/Offの切り替え必要？
-            editor.putString(getString(R.string.base), selected)
-*/
-
-
             // 1
-            val selectedCurrency = xmlElement[position]
+            val clickedCurrency = xmlElement[position]
+            System.out.println("△ △ △ △ △ △ △選択通貨：$clickedCurrency")
+            System.out.println("△ △ △ △ △ △ △行：      $position")
+            System.out.println("△ △ △ △ △ △ △Checked： ${listView.isItemChecked(position)}")
 
 
-            // save selected currency into shared file
+            // チェックボックスのON/Offの切り替えのために設定ファイルの内容を修正する?? やる必要ない？
+            // Adapterの方で設定ファイルの内容で表示処理を行う
+            when (listView.isItemChecked(position)) {
+                true -> {
+                    listView.setItemChecked(position, false)
+
+                    // drop code
+                    targetCodes.forEachIndexed { index, code ->
+                        if (code == clickedCurrency.second) {
+                            targetCodes.drop(index)
+                        }
+                    }
+                }
+                false -> {
+                    listView.setItemChecked(position, true)
+
+                    if (!targetCodes.contains(clickedCurrency.second)) {
+                        // add code
+                        targetCodes.add(clickedCurrency.second)
+                    }
+                }
+            }
+
+            val targets = Utils.createCsvStringFromArrayList(targetCodes)
             val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
             val editor = sharedPref.edit()
-            val selected = sharedPref.getString(getString(R.string.targets), getString(R.string.init_targets))
-
-            //for the first time before SharedPreferences have set
-
-/*
-設定ファイルの変更はあとで
-            editor.putString(getString(R.string.base), selected)
-*/
+            editor.putString(getString(R.string.targets), targets)
             editor.apply()
 
-
-
-
-
             System.out.println("★★ position=$position")
-//            System.out.println("★★ id=$id")
-
-            System.out.println("★★ Selected=$selected")
+            System.out.println("★★ 設定ファイルの保存する文字列：=$targets")
 
             // 再帰的に呼び出す
-            val adapter = TargetItemAdapter(this, xmlElement, basePosition)
+            val adapter = TargetItemAdapter(this, xmlElement, targetPositions)
             listView.adapter = adapter
 
 
         }
 
+
     }
 
 
 
-    private fun getTargetFromSharedPreferences(): List<String> {
+    private fun getTargetCodesFromSharedPreferences(): ArrayList<String> {
         // setting file
         val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val targets = sharedPref.getString(getString(R.string.targets), getString(R.string.init_targets))
 
         val items = targets.split(",")
 
-        return targets.split(",")
-    }
-
-
-    /*
-     *  Targetsとして選択された通貨の位置を取得する
-     */
-    private fun getBasePosition(list: ArrayList<Triple<String, String, String>>, targets: List<String>) : ArrayList<Int> {
-
-        var positionList : ArrayList<Int> = ArrayList()
-
-        list.forEachIndexed { index, value ->
-
-            targets.forEach { target ->
-                if (value.second == target) {
-                    positionList.add(index)
-                }
-            }
-        }
-        return positionList
+        return targets.split(",") as ArrayList
     }
 
 
