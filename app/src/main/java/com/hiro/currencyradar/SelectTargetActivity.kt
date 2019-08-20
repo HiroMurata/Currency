@@ -9,6 +9,7 @@ import android.preference.PreferenceManager
 import android.support.design.widget.BottomNavigationView
 import android.util.Log
 import android.widget.ListView
+import kotlinx.android.synthetic.main.list_item.view.*
 import org.xmlpull.v1.XmlPullParser
 
 class SelectTargetActivity : AppCompatActivity() {
@@ -48,7 +49,7 @@ class SelectTargetActivity : AppCompatActivity() {
         navView.getMenu().findItem(R.id.navigation_target).setChecked(true)
 
 
-        // Parse XML and Retreive xml elements into ArrayList<Triple<png, code. country>>
+        // Parse XML and retrieve xml elements into ArrayList<Triple<png, code. country>>
         val xpp : XmlResourceParser = getResources().getXml(R.xml.currencies)
         var xmlElement: ArrayList<Triple<String, String, String>> = ArrayList()
         var eventType = xpp.getEventType()
@@ -86,7 +87,7 @@ class SelectTargetActivity : AppCompatActivity() {
         // setting file
         var targetCodes = getTargetCodesFromSharedPreferences()
 
-        val targetPositions = Utils.getTargetPositions(xmlElement, targetCodes)
+        var targetPositions = Utils.getTargetPositions(xmlElement, targetCodes)
 
 
         // Create ListView of Layout for this screen
@@ -101,7 +102,7 @@ class SelectTargetActivity : AppCompatActivity() {
         }
 
 
-        val adapter = TargetItemAdapter(this,  xmlElement, targetPositions)
+        var adapter = TargetItemAdapter(this,  xmlElement, targetPositions)
         listView.adapter = adapter
 
         listView.setOnItemClickListener { _, view, position, _ ->
@@ -118,6 +119,8 @@ class SelectTargetActivity : AppCompatActivity() {
             when (listView.isItemChecked(position)) {
                 true -> {
                     listView.setItemChecked(position, false)
+                    listView.getChildAt(position).checkedTextView.isSelected = false
+
 
                     // drop code
                     targetCodes.forEachIndexed { index, code ->
@@ -128,6 +131,7 @@ class SelectTargetActivity : AppCompatActivity() {
                 }
                 false -> {
                     listView.setItemChecked(position, true)
+                    listView.getChildAt(position).checkedTextView.isSelected = true
 
                     if (!targetCodes.contains(clickedCurrency.second)) {
                         // add code
@@ -145,9 +149,21 @@ class SelectTargetActivity : AppCompatActivity() {
             System.out.println("★★ position=$position")
             System.out.println("★★ 設定ファイルの保存する文字列：=$targets")
 
+
+            // setting file
+            targetCodes = getTargetCodesFromSharedPreferences()
+            targetPositions = Utils.getTargetPositions(xmlElement, targetCodes)
+
+
+            // 再帰的に呼び出す
+            adapter.notifyDataSetChanged()
+            listView.adapter = adapter
+
+/*
             // 再帰的に呼び出す
             val adapter = TargetItemAdapter(this, xmlElement, targetPositions)
             listView.adapter = adapter
+*/
 
 
         }
