@@ -70,11 +70,14 @@ class TargetItemAdapter(private val context: Context,
         countryTextView.text = item.third
 
         if (targetPositions.contains(position)) {
-            holder.checkedTextView.setChecked(true)
+            view.isSelected = true
+
+            checkedTextView.setChecked(true)
             checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_skyblue_24dp)
 
         } else {
-            holder.checkedTextView.setChecked(false)
+            view.isSelected = false
+            checkedTextView.setChecked(false)
             checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_outline_blank_black_24dp)
         }
 

@@ -95,6 +95,7 @@ class SelectTargetActivity : AppCompatActivity() {
 
         xmlElement.forEachIndexed { index, triple ->
             listView.setItemChecked(index, false)
+
         }
 
         targetPositions.forEach{index ->
@@ -111,27 +112,29 @@ class SelectTargetActivity : AppCompatActivity() {
             val clickedCurrency = xmlElement[position]
             System.out.println("△ △ △ △ △ △ △選択通貨：$clickedCurrency")
             System.out.println("△ △ △ △ △ △ △行：      $position")
-            System.out.println("△ △ △ △ △ △ △Checked： ${listView.isItemChecked(position)}")
+            System.out.println("△ △ △ △ △ △ △Checked： ${listView.getChildAt(position).checkedTextView.isSelected}")
 
 
             // チェックボックスのON/Offの切り替えのために設定ファイルの内容を修正する?? やる必要ない？
             // Adapterの方で設定ファイルの内容で表示処理を行う
-            when (listView.isItemChecked(position)) {
-                true -> {
-                    listView.setItemChecked(position, false)
-                    listView.getChildAt(position).checkedTextView.isSelected = false
+//            when (listView.isItemChecked(position)) {
+            when (listView.getChildAt(position).checkedTextView.isSelected) {
+
+                    true -> {
+                    listView.setItemChecked(position, true)
+                    listView.getChildAt(position).checkedTextView.isSelected = true
 
 
-                    // drop code
-                    targetCodes.forEachIndexed { index, code ->
+                    // remove code
+                    targetCodes.forEach {code ->
                         if (code == clickedCurrency.second) {
-                            targetCodes.drop(index)
+                            targetCodes.remove(code)
                         }
                     }
                 }
                 false -> {
-                    listView.setItemChecked(position, true)
-                    listView.getChildAt(position).checkedTextView.isSelected = true
+                    listView.setItemChecked(position, false)
+                    listView.getChildAt(position).checkedTextView.isSelected = false
 
                     if (!targetCodes.contains(clickedCurrency.second)) {
                         // add code
