@@ -8,13 +8,13 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.design.widget.BottomNavigationView
 import android.util.Log
+import android.widget.AdapterView
 import android.widget.ListView
+import android.widget.Toast
 import kotlinx.android.synthetic.main.list_item.view.*
 import org.xmlpull.v1.XmlPullParser
 
 class SelectTargetActivity : AppCompatActivity() {
-
-    private lateinit var listView: ListView
 
     private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
@@ -42,6 +42,9 @@ class SelectTargetActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_select_target)
+
+        var listView: ListView
+
 
         // BottomNaviView setting
         val navView: BottomNavigationView = findViewById(R.id.nav_view_main)
@@ -106,7 +109,17 @@ class SelectTargetActivity : AppCompatActivity() {
         var adapter = TargetItemAdapter(this,  xmlElement, targetPositions)
         listView.adapter = adapter
 
+
         listView.setOnItemClickListener { _, view, position, _ ->
+
+
+                // AdapterView is the parent class of ListView
+                if(view.isSelected){
+                    Toast.makeText(getBaseContext(), "Checked? ${view.isSelected}", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(getBaseContext(), "Checked? ${view.isSelected}", Toast.LENGTH_SHORT).show();
+                }
+
 
             // 1
             val clickedCurrency = xmlElement[position]
@@ -160,7 +173,7 @@ class SelectTargetActivity : AppCompatActivity() {
 
             // 再帰的に呼び出す
             adapter.notifyDataSetChanged()
-            listView.adapter = adapter
+//            listView.adapter = adapter
 
 /*
             // 再帰的に呼び出す
