@@ -95,14 +95,14 @@ class SelectBaseActivity : AppCompatActivity() {
 
         listView.setOnItemClickListener { _, view, position, _ ->
 
-            val selectedCurrency = xmlElement[position]
+            val clickedCurrency = xmlElement[position]
 
             // save selected currency into shared file
             val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
             val editor = sharedPref.edit()
 
             //for the first time before SharedPreferences have set
-            editor.putString(getString(R.string.base), selectedCurrency.second)
+            editor.putString(getString(R.string.base), clickedCurrency.second)
             editor.apply()
 
             view.isSelected = true
@@ -116,7 +116,7 @@ class SelectBaseActivity : AppCompatActivity() {
 //            listView.getChildAt(position).checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_orange_24dp)
 
             Log.d("BaseActivity", "★ position=$position")
-            Log.d("BaseActivity", "★ Selected=${selectedCurrency.second}")
+            Log.d("BaseActivity", "★ Selected=${clickedCurrency.second}")
 
             // reflect changes recursively
             adapter.notifyDataSetChanged()

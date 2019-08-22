@@ -16,6 +16,8 @@ import org.xmlpull.v1.XmlPullParser
 
 class SelectTargetActivity : AppCompatActivity() {
 
+    private lateinit var listView: ListView
+
     private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.navigation_radar -> {
@@ -43,9 +45,6 @@ class SelectTargetActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_select_target)
 
-        var listView: ListView
-
-
         // BottomNaviView setting
         val navView: BottomNavigationView = findViewById(R.id.nav_view_main)
         navView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
@@ -54,21 +53,22 @@ class SelectTargetActivity : AppCompatActivity() {
 
         // Parse XML and retrieve xml elements into ArrayList<Triple<png, code. country>>
         val xpp : XmlResourceParser = getResources().getXml(R.xml.currencies)
-        var xmlElement: ArrayList<Triple<String, String, String>> = ArrayList()
+        val xmlElement: ArrayList<Triple<String, String, String>> = ArrayList()
         var eventType = xpp.eventType
 
         while (eventType != XmlPullParser.END_DOCUMENT) {
             when (eventType){
                 XmlPullParser.START_DOCUMENT -> {
-                    println("Start document")
+                    Log.d("TargetActivity", "Start document")
                 }
                 XmlPullParser.START_TAG -> {
-                    System.out.println("Start tag " + xpp.getName())
-                    if (xpp.getName() == "item") {
+                    Log.d("TargetActivity", "Start tag =${xpp.name}")
+
+                    if (xpp.name == getString(R.string.item)) {
                         val tri: Triple<String, String, String> = Triple(
-                                xpp.getAttributeValue(null, "png"),
-                                xpp.getAttributeValue(null, "code"),
-                                xpp.getAttributeValue(null, "country"))
+                                xpp.getAttributeValue(null, getString(R.string.png)),
+                                xpp.getAttributeValue(null, getString(R.string.code)),
+                                xpp.getAttributeValue(null, getString(R.string.country)))
 
                         xmlElement.add(tri)
                     }
@@ -76,7 +76,7 @@ class SelectTargetActivity : AppCompatActivity() {
                 XmlPullParser.END_TAG -> {
                 }
                 XmlPullParser.TEXT -> {
-                    System.out.println("Text " + xpp.getText())
+                    Log.d("TargetActivity", "★ Text=${xpp.text}")
                 }
             }
             eventType = xpp.next()
@@ -89,12 +89,8 @@ class SelectTargetActivity : AppCompatActivity() {
 
         // setting file
         var targetCodes = getTargetCodesFromSharedPreferences()
-
         var targetPositions = Utils.getTargetPositions(xmlElement, targetCodes)
 
-
-        // Create ListView of Layout for this screen
-        listView = findViewById(R.id.listItems)
 
         xmlElement.forEachIndexed { index, triple ->
             listView.setItemChecked(index, false)
@@ -106,6 +102,8 @@ class SelectTargetActivity : AppCompatActivity() {
         }
 
 
+        // Create ListView of Layout for this screen
+        listView = findViewById(R.id.listItems)
         var adapter = TargetItemAdapter(this,  xmlElement, targetPositions)
         listView.adapter = adapter
 
