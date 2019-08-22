@@ -12,10 +12,6 @@ import android.util.Log
 import org.xmlpull.v1.XmlPullParser
 
 
-
-
-//import kotlinx.android.synthetic.main.activity_select_term.*
-
 class SelectBaseActivity : AppCompatActivity() {
 
     private lateinit var listView: ListView
@@ -23,14 +19,14 @@ class SelectBaseActivity : AppCompatActivity() {
     private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.navigation_radar -> {
-                Log.d("BaseActivity: onCreate", "Button Term Clicked!")
+                Log.d("BaseActivity: onCreate", "Button Term Clicked")
                 val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)
 
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_target -> {
-                Log.d("BaseActivity: onCreate", "Button Target Clicked!")
+                Log.d("BaseActivity: onCreate", "Button Target Clicked")
                 val intent = Intent(this, SelectTargetActivity::class.java)
                 startActivity(intent)
 
@@ -50,26 +46,27 @@ class SelectBaseActivity : AppCompatActivity() {
         // BottomNaviView setting
         val navView: BottomNavigationView = findViewById(R.id.nav_view_main)
         navView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
-        navView.getMenu().findItem(R.id.navigation_base).setChecked(true)
+        navView.menu.findItem(R.id.navigation_base).isChecked = true
 
 
-        // Parse XML and Retreive xml elements into ArrayList<Triple<png, code. country>>
-        val xpp :XmlResourceParser = getResources().getXml(R.xml.currencies)
-        var xmlElement: ArrayList<Triple<String, String, String>> = ArrayList()
-        var eventType = xpp.getEventType()
+        // Parse XML and Retrieve xml elements into ArrayList<Triple<png, code. country>>
+        val xpp :XmlResourceParser = resources.getXml(R.xml.currencies)
+        val xmlElement: ArrayList<Triple<String, String, String>> = ArrayList()
+        var eventType = xpp.eventType
 
         while (eventType != XmlPullParser.END_DOCUMENT) {
             when (eventType){
                 XmlPullParser.START_DOCUMENT -> {
-                    println("Start document")
+                    Log.d("BaseActivity", "Start document")
                 }
                 XmlPullParser.START_TAG -> {
-                    System.out.println("Start tag " + xpp.getName())
-                    if (xpp.getName() == "item") {
+                    Log.d("BaseActivity", "Start tag =${xpp.name}")
+
+                    if (xpp.name == getString(R.string.item)) {
                         val tri: Triple<String, String, String> = Triple(
-                            xpp.getAttributeValue(null, "png"),
-                            xpp.getAttributeValue(null, "code"),
-                            xpp.getAttributeValue(null, "country"))
+                            xpp.getAttributeValue(null, getString(R.string.png)),
+                            xpp.getAttributeValue(null, getString(R.string.code)),
+                            xpp.getAttributeValue(null, getString(R.string.country)))
 
                         xmlElement.add(tri)
                     }
@@ -77,7 +74,7 @@ class SelectBaseActivity : AppCompatActivity() {
                 XmlPullParser.END_TAG -> {
                 }
                 XmlPullParser.TEXT -> {
-                    System.out.println("Text " + xpp.getText())
+                    Log.d("BaseActivity", "★ Text=${xpp.text}")
                 }
             }
             eventType = xpp.next()
@@ -85,24 +82,8 @@ class SelectBaseActivity : AppCompatActivity() {
         // indicate app done reading the resource.
         xpp.close()
 
-
-//        val imageView = findViewById<ImageView>(R.id.image_view)
-//        val assets = resources.assets
-
-//        // the way to get image filer from assets folder
-//        // try-with-resources
-//        try {
-//            resources.assets.open("images/eu.png").use { istream ->
-//                val bitmap = BitmapFactory.decodeStream(istream)
-//                image_view.setImageBitmap(bitmap)
-//            }
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//        }
-
         // setting file
         val base = getBaseFromSharedPreferences()
-
         val basePosition = getBasePosition (xmlElement, base)
 
 
@@ -112,47 +93,40 @@ class SelectBaseActivity : AppCompatActivity() {
         listView.adapter = adapter
 
 
-
         listView.setOnItemClickListener { _, view, position, _ ->
 
-            // 1
             val selectedCurrency = xmlElement[position]
-
 
             // save selected currency into shared file
             val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
             val editor = sharedPref.edit()
-            val selected = sharedPref.getString(getString(R.string.base), selectedCurrency.second)?: getString(R.string.usd)
 
             //for the first time before SharedPreferences have set
-            editor.putString(getString(R.string.base), selected)
+            editor.putString(getString(R.string.base), selectedCurrency.second)
             editor.apply()
 
+            view.isSelected = true
 
 
+//            listView.getChildAt(position).checkedTextView.isSelected = true
+//            view.checkedTextView.isChecked = true
+//            checkedTextView.isChecked = true
+//            view.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_orange_24dp)
+//            checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_orange_24dp)
+//            listView.getChildAt(position).checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_orange_24dp)
 
+            Log.d("BaseActivity", "★ position=$position")
+            Log.d("BaseActivity", "★ Selected=${selectedCurrency.second}")
 
-            System.out.println("★★ position=$position")
-//            System.out.println("★★ id=$id")
-
-            System.out.println("★★ Selected=$selected")
-
-            // 再帰的に呼び出す
-            val adapter = BaseItemAdapter(this, xmlElement, position)
-            listView.adapter = adapter
-
-
+            // reflect changes recursively
+            adapter.notifyDataSetChanged()
         }
-
-
     }
 
-    private fun getBaseFromSharedPreferences() :String {
+    private fun getBaseFromSharedPreferences() : String {
         // setting file
         val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val base = sharedPref.getString("base","USD")
-        return base ?: "USD"
-
+        return sharedPref.getString(getString(R.string.base), null)  ?: getString(R.string.usd)
     }
 
 
@@ -168,9 +142,6 @@ class SelectBaseActivity : AppCompatActivity() {
         }
         return  0
     }
-
-
-
 
 
 

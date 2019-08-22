@@ -46,13 +46,13 @@ class SelectTargetActivity : AppCompatActivity() {
         // BottomNaviView setting
         val navView: BottomNavigationView = findViewById(R.id.nav_view_main)
         navView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
-        navView.getMenu().findItem(R.id.navigation_target).setChecked(true)
+        navView.menu.findItem(R.id.navigation_target).setChecked(true)
 
 
         // Parse XML and retrieve xml elements into ArrayList<Triple<png, code. country>>
         val xpp : XmlResourceParser = getResources().getXml(R.xml.currencies)
         var xmlElement: ArrayList<Triple<String, String, String>> = ArrayList()
-        var eventType = xpp.getEventType()
+        var eventType = xpp.eventType
 
         while (eventType != XmlPullParser.END_DOCUMENT) {
             when (eventType){

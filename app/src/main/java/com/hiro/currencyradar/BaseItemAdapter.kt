@@ -39,6 +39,7 @@ class BaseItemAdapter(private val context: Context,
 
         // 1
         if (convertView == null) {
+            // First call is supposed to through here
 
             // 2
             view = inflater.inflate(R.layout.list_item, parent, false)
@@ -52,47 +53,55 @@ class BaseItemAdapter(private val context: Context,
 
             // 4
             view.tag = holder
+
+            // 6
+            val codeTextView = holder.codeTextView
+            val countryTextView = holder.countryTextView
+            val checkedTextView = holder.checkedTextView
+            val thumbnailImageView = holder.thumbnailImageView
+
+
+            // Get xml one row as Triple<png, code, country>
+            val item = getItem(position) as Triple<String, String, String>
+
+            codeTextView.text = item.second
+            countryTextView.text = item.third
+
+            when (selectedPosition == position) {
+                true -> {
+                    checkedTextView.isChecked = true
+                    checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_orange_24dp)
+                }
+                false -> {
+                    checkedTextView.isChecked = false
+                    checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_unchecked_gray_24dp)
+                }
+            }
+
+            val png = item.first
+            Picasso.get().load("file:///android_asset/$png").into(thumbnailImageView)
+
+
         } else {
-            // 5
+            // Call upon OnItemClickListener is supposed to through here
+
             view = convertView
             holder = convertView.tag as ViewHolder
-        }
 
-        // 6
-        val codeTextView = holder.codeTextView
-        val countryTextView = holder.countryTextView
-        val checkedTextView = holder.checkedTextView
-        val thumbnailImageView = holder.thumbnailImageView
-
-
-        // Get xml one row as Triple<png, code, country>
-        val item = getItem(position) as Triple<String, String, String>
-
-        codeTextView.text = item.second
-        countryTextView.text = item.third
-
-        when (selectedPosition == position) {
-            true -> {
-                System.out.println("□ ■ □ ■ □ ■ □ ■ ポジション一致")
-//                checkedTextView.setChecked(true)
-                holder.checkedTextView.setChecked(true)
-                checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_orange_24dp)
-
-            }
-            false -> {
-                System.out.println("▲ △ ▲ △ ▲ △ ▲ △ ポジション不致")
-//                checkedTextView.setChecked(false)
-                holder.checkedTextView.setChecked(false)
-                checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_outline_blank_black_24dp)
+            // "view.isSelected" is the row which is selected on ListView
+            when (view.isSelected) {
+                true -> {
+                    holder.checkedTextView.isChecked = true     // either is okay
+                    holder.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_orange_24dp)
+                }
+                false -> {
+                    holder.checkedTextView.isChecked = false    // either is okay
+                    holder.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_unchecked_gray_24dp)
+                }
             }
         }
-
-        val png = item.first
-        System.out.println("file:///android_asset/$png")
-        Picasso.get().load("file:///android_asset/$png").into(thumbnailImageView)
 
         return view
-
     }
 
     private class ViewHolder {

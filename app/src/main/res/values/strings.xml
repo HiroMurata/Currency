@@ -18,6 +18,10 @@
     <string name="cad">CAD</string>
     <string name="init_currency">USD</string>
     <string name="init_targets">EUR,GBP,JPY,CNY</string>
+    <string name="item">item</string>
+    <string name="png">png</string>
+    <string name="code">code</string>
+    <string name="country">country</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dash</string>
     <string name="title_notifications">JPY</string>
