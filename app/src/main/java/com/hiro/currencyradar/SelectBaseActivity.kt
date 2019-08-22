@@ -107,14 +107,6 @@ class SelectBaseActivity : AppCompatActivity() {
 
             view.isSelected = true
 
-
-//            listView.getChildAt(position).checkedTextView.isSelected = true
-//            view.checkedTextView.isChecked = true
-//            checkedTextView.isChecked = true
-//            view.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_orange_24dp)
-//            checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_orange_24dp)
-//            listView.getChildAt(position).checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_orange_24dp)
-
             Log.d("BaseActivity", "★ position=$position")
             Log.d("BaseActivity", "★ Selected=${clickedCurrency.second}")
 

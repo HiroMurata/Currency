@@ -13,7 +13,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:choiceMode="multipleChoice"
-        app:layout_constraintBottom_toTopOf="@+id/nav_view_main"
+        app:layout_constraintBottom_toTopOf="@+id/button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -31,17 +31,16 @@
         app:layout_constraintBottom_toBottomOf="parent"/>
 
     <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16dp"
-        android:textColor="#0000aa"
-        android:text="save"
+            android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16dp"
+            android:textColor="#0000aa"
+            android:text="save"
 
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="124dp"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/nav_view_main"
+            android:layout_marginLeft="160dp" android:layout_marginStart="160dp"/>
 
     <!--<ImageView-->
     <!--android:id="@+id/image_view"-->
