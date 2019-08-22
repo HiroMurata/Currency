@@ -69,13 +69,13 @@ class TargetItemAdapter(private val context: Context,
 
             if (targetPositions.contains(position)) {
                 view.isSelected = true
-                view.checkedTextView.isChecked = true
-                view.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_skyblue_24dp)
+                checkedTextView.isChecked = true
+                checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_skyblue_24dp)
 
             } else {
                 view.isSelected = false
-                view.checkedTextView.isChecked = false
-                view.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_outline_blank_black_24dp)
+                checkedTextView.isChecked = false
+                checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_outline_blank_black_24dp)
             }
 
             val png = item.first
@@ -99,7 +99,25 @@ class TargetItemAdapter(private val context: Context,
 
 
             // "view.isSelected" is the row which is selected on ListView
-            when (view.isSelected) {
+/*            when (holder.checkedTextView.isSelected) {
+                true -> {
+                        view.checkedTextView.isChecked = false
+                        holder.checkedTextView.isChecked = false
+//                        view.isSelected = false
+                        holder.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_outline_blank_black_24dp)
+                        view.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_outline_blank_black_24dp)
+                }
+                false -> {
+                        view.checkedTextView.isChecked = true
+                        holder.checkedTextView.isChecked = true
+//                        view.isSelected = true
+                        holder.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_skyblue_24dp)
+                        view.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_skyblue_24dp)
+
+                }
+            }*/
+
+            when (view.isSelected) { //ここでチェックされたものが押されたときにヒットしない
                 true -> {
                     if (view.checkedTextView.isChecked) {
                         view.checkedTextView.isChecked = false

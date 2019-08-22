@@ -112,6 +112,8 @@ class SelectTargetActivity : AppCompatActivity() {
 
         listView.setOnItemClickListener { _, view, position, _ ->
 
+            view.isSelected = true
+
             /*
             // I have tried below for confirm whether item was checked.
             listView.getChildAt(position).checkedTextView.isSelected
@@ -119,18 +121,25 @@ class SelectTargetActivity : AppCompatActivity() {
             checkedTextView.isChecked
             view.checkedTextView.isChecked
 */
-            when(view.checkedTextView.isChecked) {
-                true ->
-                    view.isSelected = false
-                false ->
-                    view.isSelected = true
-            }
+
+//            Toast.makeText(getBaseContext(), "Checked? : ${view.checkedTextView.isChecked}", Toast.LENGTH_SHORT).show();
+//            when(view.checkedTextView.isChecked) {
+//                true -> { //下記の３行効いてない。
+//                    view.isSelected = true
+////                    view.checkedTextView.isChecked = false
+////                    listView.getChildAt(position).checkedTextView.isSelected = false
+//                }
+//                false -> {
+//                    view.isSelected = true
+////                    view.checkedTextView.isChecked = true
+////                    listView.getChildAt(position).checkedTextView.isSelected = true
+//                }
+//            }
 
 
             // AdapterView is the parent class of ListView
 //            Toast.makeText(getBaseContext(), "Checked? : ${view.isSelected}", Toast.LENGTH_SHORT).show();
 //            Toast.makeText(getBaseContext(), "Checked? : ${listView.getChildAt(position).checkedTextView.isSelected}", Toast.LENGTH_SHORT).show();
-            Toast.makeText(getBaseContext(), "Checked? : ${view.checkedTextView.isChecked}", Toast.LENGTH_SHORT).show();
 //            Toast.makeText(getBaseContext(), "Checked? : ${checkedTextView.isChecked}", Toast.LENGTH_SHORT).show();
 
 
