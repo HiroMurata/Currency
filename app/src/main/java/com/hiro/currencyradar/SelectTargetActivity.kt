@@ -11,7 +11,9 @@ import android.util.Log
 import android.widget.AdapterView
 import android.widget.ListView
 import android.widget.Toast
+import kotlinx.android.synthetic.main.list_item.*
 import kotlinx.android.synthetic.main.list_item.view.*
+import kotlinx.android.synthetic.main.list_item.view.checkedTextView
 import org.xmlpull.v1.XmlPullParser
 
 class SelectTargetActivity : AppCompatActivity() {
@@ -91,6 +93,8 @@ class SelectTargetActivity : AppCompatActivity() {
         var targetCodes = getTargetCodesFromSharedPreferences()
         var targetPositions = Utils.getTargetPositions(xmlElement, targetCodes)
 
+        // Create ListView of Layout for this screen
+        listView = findViewById(R.id.listItems)
 
         xmlElement.forEachIndexed { index, triple ->
             listView.setItemChecked(index, false)
@@ -102,21 +106,32 @@ class SelectTargetActivity : AppCompatActivity() {
         }
 
 
-        // Create ListView of Layout for this screen
-        listView = findViewById(R.id.listItems)
         var adapter = TargetItemAdapter(this,  xmlElement, targetPositions)
         listView.adapter = adapter
 
 
         listView.setOnItemClickListener { _, view, position, _ ->
 
+            /*
+            // I have tried below for confirm whether item was checked.
+            listView.getChildAt(position).checkedTextView.isSelected
+            view.checkedTextView.isChecked
+            checkedTextView.isChecked
+            view.checkedTextView.isChecked
+*/
+            when(view.checkedTextView.isChecked) {
+                true ->
+                    view.isSelected = false
+                false ->
+                    view.isSelected = true
+            }
 
-                // AdapterView is the parent class of ListView
-                if(view.isSelected){
-                    Toast.makeText(getBaseContext(), "Checked? ${view.isSelected}", Toast.LENGTH_SHORT).show();
-                }else{
-                    Toast.makeText(getBaseContext(), "Checked? ${view.isSelected}", Toast.LENGTH_SHORT).show();
-                }
+
+            // AdapterView is the parent class of ListView
+//            Toast.makeText(getBaseContext(), "Checked? : ${view.isSelected}", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getBaseContext(), "Checked? : ${listView.getChildAt(position).checkedTextView.isSelected}", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getBaseContext(), "Checked? : ${view.checkedTextView.isChecked}", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getBaseContext(), "Checked? : ${checkedTextView.isChecked}", Toast.LENGTH_SHORT).show();
 
 
             // 1
@@ -129,36 +144,36 @@ class SelectTargetActivity : AppCompatActivity() {
             // チェックボックスのON/Offの切り替えのために設定ファイルの内容を修正する?? やる必要ない？
             // Adapterの方で設定ファイルの内容で表示処理を行う
 //            when (listView.isItemChecked(position)) {
-            when (listView.getChildAt(position).checkedTextView.isSelected) {
-
-                    true -> {
-                    listView.setItemChecked(position, true)
-                    listView.getChildAt(position).checkedTextView.isSelected = true
-
-
-                    // remove code
-                    targetCodes.forEach {code ->
-                        if (code == clickedCurrency.second) {
-                            targetCodes.remove(code)
-                        }
-                    }
-                }
-                false -> {
-                    listView.setItemChecked(position, false)
-                    listView.getChildAt(position).checkedTextView.isSelected = false
-
-                    if (!targetCodes.contains(clickedCurrency.second)) {
-                        // add code
-                        targetCodes.add(clickedCurrency.second)
-                    }
-                }
-            }
+//            when (listView.getChildAt(position).checkedTextView.isSelected) {
+//
+//                    true -> {
+//                    listView.setItemChecked(position, true)
+//                    listView.getChildAt(position).checkedTextView.isSelected = true
+//
+//
+//                    // remove code
+//                    targetCodes.forEach {code ->
+//                        if (code == clickedCurrency.second) {
+//                            targetCodes.remove(code)
+//                        }
+//                    }
+//                }
+//                false -> {
+//                    listView.setItemChecked(position, false)
+//                    listView.getChildAt(position).checkedTextView.isSelected = false
+//
+//                    if (!targetCodes.contains(clickedCurrency.second)) {
+//                        // add code
+//                        targetCodes.add(clickedCurrency.second)
+//                    }
+//                }
+//            }
 
             val targets = Utils.createCsvStringFromArrayList(targetCodes)
             val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
             val editor = sharedPref.edit()
-            editor.putString(getString(R.string.targets), targets)
-            editor.apply()
+//            editor.putString(getString(R.string.targets), targets)
+//            editor.apply()
 
             System.out.println("★★ position=$position")
             System.out.println("★★ 設定ファイルの保存する文字列：=$targets")
