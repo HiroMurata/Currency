@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.list_item.view.*
 
 /*
  * This Adapter is for getting Target Currencies
@@ -34,8 +35,8 @@ class TargetItemAdapter(private val context: Context,
      */
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
 
-        val view: View
-        val holder: ViewHolder
+        var view: View
+        var holder: ViewHolder
 
         // 1
         if (convertView == null) {
@@ -71,14 +72,13 @@ class TargetItemAdapter(private val context: Context,
 
         if (targetPositions.contains(position)) {
             view.isSelected = true
-
-            checkedTextView.setChecked(true)
-            checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_skyblue_24dp)
+            view.checkedTextView.isChecked = true
+            view.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_skyblue_24dp)
 
         } else {
             view.isSelected = false
-            checkedTextView.setChecked(false)
-            checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_outline_blank_black_24dp)
+            view.checkedTextView.isChecked = false
+            view.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_outline_blank_black_24dp)
         }
 
         val png = item.first
