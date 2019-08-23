@@ -65,12 +65,12 @@ class TargetItemAdapter(private val context: Context,
             countryTextView.text = item.third
 
             if (targetPositions.contains(position)) {
-                view.isSelected = true
+//                view.isSelected = true
                 checkedTextView.isChecked = true
                 checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_skyblue_24dp)
 
             } else {
-                view.isSelected = false
+//                view.isSelected = false
                 checkedTextView.isChecked = false
                 checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_outline_blank_black_24dp)
             }
@@ -84,16 +84,21 @@ class TargetItemAdapter(private val context: Context,
 
             view = convertView
 
-            Log.d("TargetItemAdapter", "★ view.isSelected :${view.isSelected}")
-            Log.d("TargetItemAdapter", "★ view.checkedTextView.isChecked :${ view.checkedTextView.isChecked}")
+//            Log.d("TargetItemAdapter", "★ view.isSelected :${view.isSelected}")
+            Log.d("TargetItemAdapter", "★ VIEW.checkedTextView.isChecked :${ view.checkedTextView.isChecked}")
+            Log.d("TargetItemAdapter", "★                              position : $position")
 
             // handle only for clicked row
             when (view.isSelected) {
                 true -> {
                     if (view.checkedTextView.isChecked) {
+
+//                        view.isSelected = false //Save用に追加（効いてない）
+
                         view.checkedTextView.isChecked = false
                         view.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_outline_blank_black_24dp)
                     } else {
+//                        view.isSelected = true //Save用に追加（効いてない）
                         view.checkedTextView.isChecked = true
                         view.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_skyblue_24dp)
                     }

@@ -1,5 +1,7 @@
 package com.hiro.currencyradar
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.XmlResourceParser
@@ -8,9 +10,15 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.design.widget.BottomNavigationView
 import android.util.Log
+import android.view.Gravity
 import android.widget.ListView
+import kotlinx.android.synthetic.main.activity_select_target.*
 import kotlinx.android.synthetic.main.list_item.view.checkedTextView
 import org.xmlpull.v1.XmlPullParser
+import android.R.attr.gravity
+import android.widget.LinearLayout
+
+
 
 class SelectTargetActivity : AppCompatActivity() {
 
@@ -43,10 +51,51 @@ class SelectTargetActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_select_target)
 
+        button.setOnClickListener {
+            Log.d("TargetActivity:onCreate", "Button Clicked!")
+//            Log.d("TargetActivity", "★ listView.checkedItemCount. = ${listView.checkedItemCount}")
+            Log.d("TargetActivity", "★ listView.checkedItemCount. = ${listView.getCheckedItemPositions().size() }")
+
+            var count = 0
+            for (i in 1 .. listView.childCount) {
+                if (listView.getChildAt(i-1).checkedTextView.isChecked)
+                    count++
+            }
+            Log.d("TargetActivity", "★ カウント ： $count")
+            when (count) {
+                0,1,2 -> {
+                    // build alert dialog
+                    val dialogBuilder = AlertDialog.Builder(this)
+
+                    // set message of alert dialog
+                    dialogBuilder.setMessage("Please select at least 3 currencies.")
+
+//                    val positiveButton = alert.getButton(AlertDialog.BUTTON_POSITIVE)
+//                    positiveButton.gravity = Gravity.CENTER
+
+                    dialogBuilder.setNegativeButton("OK", { _, _ ->
+                        //pass
+                    })
+
+                    // create dialog box
+                    val alert = dialogBuilder.create()
+                    // set title for alert dialog box
+                    alert.setTitle("Information")
+
+
+                    // show alert dialog
+                    alert.show()
+
+
+                }
+
+            }
+        }
+
         // BottomNaviView setting
         val navView: BottomNavigationView = findViewById(R.id.nav_view_main)
         navView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
-        navView.menu.findItem(R.id.navigation_target).setChecked(true)
+        navView.menu.findItem(R.id.navigation_target).isChecked = true
 
 
         // Parse XML and retrieve xml elements into ArrayList<Triple<png, code. country>>
@@ -93,13 +142,18 @@ class SelectTargetActivity : AppCompatActivity() {
         listView = findViewById(R.id.listItems)
 
         xmlElement.forEachIndexed { index, triple ->
-            listView.setItemChecked(index, false)
-
+            if (targetPositions.contains(index)) {
+//                listView.getChildAt(index).checkedTextView.isChecked = true //
+                listView.setItemChecked(index, true)
+            } else {
+                listView.setItemChecked(index, false)
+            }
         }
 
-        targetPositions.forEach{index ->
-            listView.setItemChecked(index, true)
+/*
+        targetPositions.forEach{ index ->
         }
+*/
 
 
         val adapter = TargetItemAdapter(this,  xmlElement, targetPositions)
@@ -109,6 +163,14 @@ class SelectTargetActivity : AppCompatActivity() {
         listView.setOnItemClickListener { _, view, position, _ ->
 
             view.isSelected = true
+
+/*            if (listView.getChildAt(position).checkedTextView.isSelected) {
+                view.checkedTextView.isSelected = false
+                listView.getChildAt(position).checkedTextView.isSelected = false
+            } else {
+                listView.getChildAt(position).checkedTextView.isSelected = true
+            }*/
+
 
             // 1
             val clickedCurrency = xmlElement[position]
@@ -144,7 +206,7 @@ class SelectTargetActivity : AppCompatActivity() {
         val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val targets = sharedPref.getString(getString(R.string.targets), getString(R.string.init_targets))
 
-        val items = targets.split(",")
+//        val items = targets.split(",")
 
         return targets.split(",") as ArrayList
     }

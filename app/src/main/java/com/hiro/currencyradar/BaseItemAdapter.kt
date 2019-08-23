@@ -92,7 +92,7 @@ class BaseItemAdapter(private val context: Context,
             when (view.isSelected) {
                 true -> {
                     holder.checkedTextView.isChecked = true     // either is okay
-                    holder.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_orange_24dp)
+                    holder.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_green_24dp)
                 }
                 false -> {
                     holder.checkedTextView.isChecked = false    // either is okay
