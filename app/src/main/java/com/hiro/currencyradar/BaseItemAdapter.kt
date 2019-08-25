@@ -6,6 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.list_item.view.*
+import android.widget.CompoundButton
+import android.support.design.widget.CoordinatorLayout.Behavior.setTag
+import android.util.Log
+
 
 /*
  * This Adapter is for getting Base Currency
@@ -16,6 +21,8 @@ class BaseItemAdapter(private val context: Context,
 
     private val inflater: LayoutInflater
             = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+
+    var initialPosition = selectedPosition
 
     override fun getCount(): Int {
         return dataSource.size
@@ -31,6 +38,8 @@ class BaseItemAdapter(private val context: Context,
 
     /*
      * this getView method  will be called repeatedly for dataSource(rows of currency.xml)
+     * refer below site.
+     * https://www.raywenderlich.com/155-android-listview-tutorial-with-kotlin
      */
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
 
@@ -39,7 +48,10 @@ class BaseItemAdapter(private val context: Context,
 
         // 1
         if (convertView == null) {
-            // First call is supposed to through here
+            Log.d("Adapter: getView", "初期の方")
+            Log.d("Adapter: getView", "初期の方 selectedPosition=$selectedPosition")
+
+            // Only first call is supposed to through here
 
             // 2
             view = inflater.inflate(R.layout.list_item, parent, false)
@@ -67,12 +79,15 @@ class BaseItemAdapter(private val context: Context,
             codeTextView.text = item.second
             countryTextView.text = item.third
 
-            when (selectedPosition == position) {
+            when (initialPosition == position) {
                 true -> {
+                    view.isSelected = true
                     checkedTextView.isChecked = true
                     checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_orange_24dp)
+
                 }
                 false -> {
+                    view.isSelected = false
                     checkedTextView.isChecked = false
                     checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_unchecked_gray_24dp)
                 }
@@ -81,24 +96,58 @@ class BaseItemAdapter(private val context: Context,
             val png = item.first
             Picasso.get().load("file:///android_asset/$png").into(thumbnailImageView)
 
-
         } else {
-            // Call upon OnItemClickListener is supposed to through here
+            Log.d("Adapter: getView", "エルスの方")
+            // Except first call such like OnItemClickListener is supposed to through here
 
             view = convertView
             holder = convertView.tag as ViewHolder
 
+            // 6
+            val codeTextView = holder.codeTextView
+            val countryTextView = holder.countryTextView
+            val checkedTextView = holder.checkedTextView
+            val thumbnailImageView = holder.thumbnailImageView
+
+            // Get xml one row as Triple<png, code, country>
+            val item = getItem(position) as Triple<String, String, String>
+
+            codeTextView.text = item.second
+            countryTextView.text = item.third
+
+            when (initialPosition == position) {
+                true -> {
+                    view.isSelected = true
+                    checkedTextView.isChecked = true
+                    checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_orange_24dp)
+
+                }
+                false -> {
+                    view.isSelected = false
+                    checkedTextView.isChecked = false
+                    checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_unchecked_gray_24dp)
+                }
+            }
+
+
             // "view.isSelected" is the row which is selected on ListView
             when (view.isSelected) {
                 true -> {
-                    holder.checkedTextView.isChecked = true     // either is okay
-                    holder.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_green_24dp)
+
+                    Log.d("Adapter: getView", "エルスの方  ★★★★★★★★view.id=${view.id}")
+                    checkedTextView.isChecked = true     // either is okay
+                    checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_green_24dp)
+//                    view.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_green_24dp)
                 }
                 false -> {
-                    holder.checkedTextView.isChecked = false    // either is okay
-                    holder.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_unchecked_gray_24dp)
+                    checkedTextView.isChecked = false    // either is okay
+                    checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_unchecked_gray_24dp)
                 }
             }
+            Log.d("Adapter: getView", "エルスの方 selectedPosition=$selectedPosition")
+
+            val png = item.first
+            Picasso.get().load("file:///android_asset/$png").into(thumbnailImageView)
         }
 
         return view

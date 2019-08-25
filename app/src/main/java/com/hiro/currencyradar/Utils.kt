@@ -9,7 +9,7 @@ object Utils {
      */
     fun getTargetPositions(list: ArrayList<Triple<String, String, String>>, targets: List<String>) : ArrayList<Int> {
 
-        var positionList : ArrayList<Int> = ArrayList()
+        val positionList : ArrayList<Int> = ArrayList()
 
         list.forEachIndexed { index, value ->
 

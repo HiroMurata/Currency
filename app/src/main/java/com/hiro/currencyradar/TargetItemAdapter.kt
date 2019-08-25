@@ -19,6 +19,11 @@ class TargetItemAdapter(private val context: Context,
     private val inflater: LayoutInflater
             = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
+    var selectedPosition = -1
+    var changedTargetPositions = ArrayList(targetPositions)
+
+    var checkedCount = 0
+
     override fun getCount(): Int {
         return dataSource.size
     }
@@ -39,20 +44,24 @@ class TargetItemAdapter(private val context: Context,
         val view: View
         val holder: ViewHolder
 
-        // 1
+        // 1 When the screen initially created come through here
         if (convertView == null) {
-            // First call is supposed to through here
+            Log.d("Adapter: getView", "初期の方")
 
+            // 2
             view = inflater.inflate(R.layout.list_item, parent, false)
 
+            // 3
             holder = ViewHolder()
             holder.thumbnailImageView = view.findViewById(R.id.imageView) as ImageView
             holder.codeTextView = view.findViewById(R.id.codeTextView) as TextView
             holder.countryTextView = view.findViewById(R.id.countryTextView) as TextView
             holder.checkedTextView = view.findViewById(R.id.checkedTextView) as CheckedTextView
 
+            // 4
             view.tag = holder
 
+            // 6
             val thumbnailImageView = holder.thumbnailImageView
             val codeTextView = holder.codeTextView
             val countryTextView = holder.countryTextView
@@ -65,12 +74,12 @@ class TargetItemAdapter(private val context: Context,
             countryTextView.text = item.third
 
             if (targetPositions.contains(position)) {
-//                view.isSelected = true
+                view.isSelected = true
                 checkedTextView.isChecked = true
                 checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_skyblue_24dp)
-
+                checkedCount++
             } else {
-//                view.isSelected = false
+                view.isSelected = false
                 checkedTextView.isChecked = false
                 checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_outline_blank_black_24dp)
             }
@@ -80,30 +89,74 @@ class TargetItemAdapter(private val context: Context,
             Picasso.get().load("file:///android_asset/$png").into(thumbnailImageView)
 
         } else {
+            // Call upon OnItemClickListener come through here, and when swipe screen also come through here
+
+            Log.d("Adapter: getView", "エルスの方")
+            Log.d("Adapter: getView", "エルスの方のposition=$position")
             // Call upon OnItemClickListener is supposed to through here
 
             view = convertView
+            holder = convertView.tag as ViewHolder
 
-//            Log.d("TargetItemAdapter", "★ view.isSelected :${view.isSelected}")
-            Log.d("TargetItemAdapter", "★ VIEW.checkedTextView.isChecked :${ view.checkedTextView.isChecked}")
-            Log.d("TargetItemAdapter", "★                              position : $position")
+            // 6
+            val codeTextView = holder.codeTextView
+            val countryTextView = holder.countryTextView
+            val checkedTextView = holder.checkedTextView
+            val thumbnailImageView = holder.thumbnailImageView
 
-            // handle only for clicked row
-            when (view.isSelected) {
-                true -> {
-                    if (view.checkedTextView.isChecked) {
+            // Get xml one row as Triple<png, code, country>
+            val item = getItem(position) as Triple<String, String, String>
 
-//                        view.isSelected = false //Save用に追加（効いてない）
+            codeTextView.text = item.second
+            countryTextView.text = item.third
 
+            if (changedTargetPositions.contains(position)) {
+                view.isSelected = true
+                checkedTextView.isChecked = true
+                checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_green_24dp)
+
+                when (position == selectedPosition) {
+                    true -> {
+                        view.isSelected = false
                         view.checkedTextView.isChecked = false
                         view.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_outline_blank_black_24dp)
-                    } else {
-//                        view.isSelected = true //Save用に追加（効いてない）
-                        view.checkedTextView.isChecked = true
-                        view.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_skyblue_24dp)
+                        if (changedTargetPositions.contains(selectedPosition)) {
+                            changedTargetPositions.remove(selectedPosition)
+                        }
+                        selectedPosition = -1
+                        checkedCount--
+
                     }
                 }
+
+
+            } else {
+                view.isSelected = false
+                checkedTextView.isChecked = false
+                checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_outline_blank_black_24dp)
+
+                when (position == selectedPosition) {
+                    true -> {
+                        view.isSelected = true //Save用に追加（効いてない）
+                        view.checkedTextView.isChecked = true
+                        view.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_green_24dp)
+                        if (!changedTargetPositions.contains(selectedPosition)) {
+                            changedTargetPositions.add(selectedPosition)
+                        }
+                        selectedPosition = -1
+                        checkedCount ++
+                    }
+                }
+
             }
+
+            // handle only for clicked row
+
+            Log.d("Adapter: getView", "エルスの方 selectedPosition=$selectedPosition")
+
+            val png = item.first
+            Picasso.get().load("file:///android_asset/$png").into(thumbnailImageView)
+
         }
 
         return view

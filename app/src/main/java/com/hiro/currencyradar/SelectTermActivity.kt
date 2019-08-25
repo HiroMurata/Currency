@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_select_base.*
-import kotlinx.android.synthetic.main.activity_select_base.button
 import kotlinx.android.synthetic.main.activity_select_target.*
 
 class SelectTermActivity : AppCompatActivity() {

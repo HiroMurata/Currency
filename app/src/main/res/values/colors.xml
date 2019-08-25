@@ -7,4 +7,11 @@
     <color name="material_blue">#64b5f6</color>
     <color name="material_green">#81c784</color>
     <color name="material_yellow">#fff176</color>
+
+<!--  for Dialog  -->
+    <color name="primary">#008577</color>
+    <color name="primary_dark">#00574B</color>
+    <color name="accent">#0000ff</color>
+
+
 </resources>

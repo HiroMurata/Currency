@@ -9,6 +9,7 @@ import android.preference.PreferenceManager
 import android.content.SharedPreferences
 import android.support.design.widget.BottomNavigationView
 import android.util.Log
+import android.widget.AbsListView
 import org.xmlpull.v1.XmlPullParser
 
 
@@ -43,7 +44,7 @@ class SelectBaseActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_select_base)
 
-        // BottomNaviView setting
+        // BottomNavigationView setting
         val navView: BottomNavigationView = findViewById(R.id.nav_view_main)
         navView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
         navView.menu.findItem(R.id.navigation_base).isChecked = true
@@ -86,12 +87,28 @@ class SelectBaseActivity : AppCompatActivity() {
         val base = getBaseFromSharedPreferences()
         val basePosition = getBasePosition (xmlElement, base)
 
-
         // Create ListView of Layout for this screen
         listView = findViewById(R.id.listItems)
-        val adapter = BaseItemAdapter(this,  xmlElement, basePosition)
+        val adapter = BaseItemAdapter(this, xmlElement, basePosition)
         listView.adapter = adapter
 
+
+        listView.setOnScrollListener(
+            object: AbsListView.OnScrollListener{
+                override fun onScroll(p0: AbsListView?, p1: Int, p2: Int, p3: Int) {
+                    Log.d( "tag", "scroll" )
+                    Log.d( "p1,p2,p3", "p1=$p1, p2=$p2, p3=$p3" )
+                    if (p3 == p1 + p2) {
+                        Log.d( "tag★", "次画面表示処理" )
+                    }
+
+                }
+                override fun onScrollStateChanged(p0: AbsListView?, p1: Int) {
+                    Log.d( "tag★", "★p1=$p1" )
+                }
+
+            }
+        )
 
         listView.setOnItemClickListener { _, view, position, _ ->
 
@@ -105,10 +122,17 @@ class SelectBaseActivity : AppCompatActivity() {
             editor.putString(getString(R.string.base), clickedCurrency.second)
             editor.apply()
 
-            view.isSelected = true
+//            view.isSelected = true
 
             Log.d("BaseActivity", "★ position=$position")
             Log.d("BaseActivity", "★ Selected=${clickedCurrency.second}")
+
+            // reflect changes recursively
+//            adapter = BaseItemAdapter(this, xmlElement, position)
+//            listView.adapter = adapter
+
+            // pass selected position to adapter
+            adapter.initialPosition = position
 
             // reflect changes recursively
             adapter.notifyDataSetChanged()

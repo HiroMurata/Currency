@@ -1,11 +1,12 @@
 package com.hiro.currencyradar
 
-import android.app.AlertDialog
+//import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.XmlResourceParser
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.app.AlertDialog;
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.design.widget.BottomNavigationView
@@ -17,6 +18,16 @@ import kotlinx.android.synthetic.main.list_item.view.checkedTextView
 import org.xmlpull.v1.XmlPullParser
 import android.R.attr.gravity
 import android.widget.LinearLayout
+import android.R.drawable
+import android.widget.TextView
+import android.util.SparseBooleanArray
+
+
+
+
+//import javax.swing.text.StyleConstants.setIcon
+
+
 
 
 
@@ -56,43 +67,71 @@ class SelectTargetActivity : AppCompatActivity() {
 //            Log.d("TargetActivity", "★ listView.checkedItemCount. = ${listView.checkedItemCount}")
             Log.d("TargetActivity", "★ listView.checkedItemCount. = ${listView.getCheckedItemPositions().size() }")
 
+            val checkedItemPositions = listView.checkedItemPositions
+            val checkedItemCount = checkedItemPositions.size()
+
+            Log.d("TargetActivity", "★ listView checkedItemCount = $checkedItemCount")
+//            Log.d("TargetActivity", "★ adapter ★checkedCount = ${listView.adapter.checkedCount}")
+
             var count = 0
             for (i in 1 .. listView.childCount) {
+                // TODO consider getChildAtだと見えてるところしか取ってこれない。
                 if (listView.getChildAt(i-1).checkedTextView.isChecked)
                     count++
             }
             Log.d("TargetActivity", "★ カウント ： $count")
-            when (count) {
-                0,1,2 -> {
+            when {
+                count == 0|| count == 1 || count == 2 -> {
                     // build alert dialog
-                    val dialogBuilder = AlertDialog.Builder(this)
+                    val alertDialog = AlertDialog.Builder(this, R.style.MyAlertDialogStyle)
 
-                    // set message of alert dialog
-                    dialogBuilder.setMessage("Please select at least 3 currencies.")
+                    // ダイアログの設定
+                    alertDialog.setIcon(R.drawable.ic_alart_orange_24dp)   //アイコン設定
+                    alertDialog.setTitle("Info")      //タイトル設定
+                    alertDialog.setMessage("Please select at least three currencies.")  //内容(メッセージ)設定
+                    alertDialog
 
-//                    val positiveButton = alert.getButton(AlertDialog.BUTTON_POSITIVE)
-//                    positiveButton.gravity = Gravity.CENTER
-
-                    dialogBuilder.setNegativeButton("OK", { _, _ ->
-                        //pass
+                    // OK(肯定的な)ボタンの設定
+                    alertDialog.setPositiveButton("OK", DialogInterface.OnClickListener { dialog, which ->
+                        // OKボタン押下時の処理
+                        Log.d("AlertDialog", "Positive which :$which")
                     })
 
-                    // create dialog box
-                    val alert = dialogBuilder.create()
-                    // set title for alert dialog box
-                    alert.setTitle("Information")
 
 
-                    // show alert dialog
-                    alert.show()
+                    // ダイアログの作成と描画
+                    // alertDialog.create();
+                    alertDialog.show() // .show() including .create()
+                }
+                count >= 7 -> {
+                    // build alert dialog
+                    val alertDialog = AlertDialog.Builder(this, R.style.MyAlertDialogStyle)
 
+                    // ダイアログの設定
+                    alertDialog.setIcon(R.drawable.ic_alart_orange_24dp)   //アイコン設定
+                    alertDialog.setTitle("Info")      //タイトル設定
+                    alertDialog.setMessage("Please select less than seven currencies.")  //内容(メッセージ)設定
+                    alertDialog
+
+                    // OK(肯定的な)ボタンの設定
+                    alertDialog.setPositiveButton("OK", DialogInterface.OnClickListener { dialog, which ->
+                        // OKボタン押下時の処理
+                        Log.d("AlertDialog", "Positive which :$which")
+                    })
+
+
+
+                    // ダイアログの作成と描画
+                    // alertDialog.create();
+                    alertDialog.show() // .show() including .create()
 
                 }
+
 
             }
         }
 
-        // BottomNaviView setting
+        // BottomNavigationView setting
         val navView: BottomNavigationView = findViewById(R.id.nav_view_main)
         navView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
         navView.menu.findItem(R.id.navigation_target).isChecked = true
@@ -131,9 +170,6 @@ class SelectTargetActivity : AppCompatActivity() {
         // indicate app done reading the resource.
         xpp.close()
 
-
-
-
         // setting file
         var targetCodes = getTargetCodesFromSharedPreferences()
         var targetPositions = Utils.getTargetPositions(xmlElement, targetCodes)
@@ -141,19 +177,14 @@ class SelectTargetActivity : AppCompatActivity() {
         // Create ListView of Layout for this screen
         listView = findViewById(R.id.listItems)
 
-        xmlElement.forEachIndexed { index, triple ->
+/*        xmlElement.forEachIndexed { index, triple ->
             if (targetPositions.contains(index)) {
 //                listView.getChildAt(index).checkedTextView.isChecked = true //
                 listView.setItemChecked(index, true)
             } else {
                 listView.setItemChecked(index, false)
             }
-        }
-
-/*
-        targetPositions.forEach{ index ->
-        }
-*/
+        }*/
 
 
         val adapter = TargetItemAdapter(this,  xmlElement, targetPositions)
@@ -162,7 +193,7 @@ class SelectTargetActivity : AppCompatActivity() {
 
         listView.setOnItemClickListener { _, view, position, _ ->
 
-            view.isSelected = true
+//            view.isSelected = true
 
 /*            if (listView.getChildAt(position).checkedTextView.isSelected) {
                 view.checkedTextView.isSelected = false
@@ -176,7 +207,6 @@ class SelectTargetActivity : AppCompatActivity() {
             val clickedCurrency = xmlElement[position]
             Log.d("TargetActivity", "★ clickedCurrency = $clickedCurrency")
             Log.d("TargetActivity", "★ clicked row = $position")
-            Log.d("TargetActivity", "★ Check box  Checked? -> ${listView.getChildAt(position).checkedTextView.isSelected}")
 
             val targets = Utils.createCsvStringFromArrayList(targetCodes)
             val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
@@ -191,6 +221,9 @@ class SelectTargetActivity : AppCompatActivity() {
             // setting file
             targetCodes = getTargetCodesFromSharedPreferences()
             targetPositions = Utils.getTargetPositions(xmlElement, targetCodes)
+
+            // pass selected position to adapter
+            adapter.selectedPosition = position
 
             // reflect changes recursively
             adapter.notifyDataSetChanged()

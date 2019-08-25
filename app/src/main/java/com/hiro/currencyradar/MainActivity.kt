@@ -271,9 +271,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getLatestUrl(): String {
 
-        // setting file
-        val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val base = sharedPref.getString("base","USD")
+        val base = getBaseCurrency()
 
         var latestURL: String = getString(R.string.latest_url)
 
@@ -299,9 +297,7 @@ class MainActivity : AppCompatActivity() {
         val startDate = pair.first
         val endDate = pair.second
 
-        // setting file
-        val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val base = sharedPref.getString("base",getString(R.string.init_currency))
+        val base = getBaseCurrency()
 
         var str = ""
         selectedCurrencyList.forEachIndexed { index, value ->
@@ -325,17 +321,17 @@ class MainActivity : AppCompatActivity() {
         // setting file
         val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val editor = sharedPref.edit()
-        var base : String = sharedPref.getString("base", "")
+        var base : String? = sharedPref.getString(getString(R.string.base), "")
 
         if (base.isNullOrEmpty()) {
             base = getString(R.string.init_currency)
 
             //for the first time before SharedPreferences have set
-            editor.putString("base", base)
+            editor.putString(getString(R.string.base), base)
             editor.apply()
 
         }
-        return base
+        return base ?: "USD"
     }
 
     /*
@@ -349,15 +345,17 @@ class MainActivity : AppCompatActivity() {
         val targets : String = sharedPref.getString("selected", "")
 
         var items: List<String>
-        if (targets.isNullOrEmpty()) {
-            //for the first time before SharedPreferences have set
-            editor.putString("selected", getString(R.string.init_targets))
-            editor.apply()
+        when (targets.isNullOrEmpty()){
+            true -> {
+                //for the first time before SharedPreferences have set
+                editor.putString("selected", getString(R.string.init_targets))
+                editor.apply()
 
-            items = getItems(getString(R.string.init_targets))
-        } else {
-            items = getItems(targets)
-
+                items = getItems(getString(R.string.init_targets))
+            }
+            false -> {
+                items = getItems(targets)
+            }
         }
         // remove base from selected just in case
         val base : String = sharedPref.getString("base","")
