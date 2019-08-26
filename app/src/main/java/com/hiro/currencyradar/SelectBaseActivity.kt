@@ -17,6 +17,9 @@ class SelectBaseActivity : AppCompatActivity() {
 
     private lateinit var listView: ListView
 
+    /*
+     * Setting of BottomNavigationView
+     */
     private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.navigation_radar -> {
@@ -49,39 +52,8 @@ class SelectBaseActivity : AppCompatActivity() {
         navView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
         navView.menu.findItem(R.id.navigation_base).isChecked = true
 
-
-        // Parse XML and Retrieve xml elements into ArrayList<Triple<png, code. country>>
-        val xpp :XmlResourceParser = resources.getXml(R.xml.currencies)
-        val xmlElement: ArrayList<Triple<String, String, String>> = ArrayList()
-        var eventType = xpp.eventType
-
-        while (eventType != XmlPullParser.END_DOCUMENT) {
-            when (eventType){
-                XmlPullParser.START_DOCUMENT -> {
-                    Log.d("BaseActivity", "Start document")
-                }
-                XmlPullParser.START_TAG -> {
-                    Log.d("BaseActivity", "Start tag =${xpp.name}")
-
-                    if (xpp.name == getString(R.string.item)) {
-                        val tri: Triple<String, String, String> = Triple(
-                            xpp.getAttributeValue(null, getString(R.string.png)),
-                            xpp.getAttributeValue(null, getString(R.string.code)),
-                            xpp.getAttributeValue(null, getString(R.string.country)))
-
-                        xmlElement.add(tri)
-                    }
-                }
-                XmlPullParser.END_TAG -> {
-                }
-                XmlPullParser.TEXT -> {
-                    Log.d("BaseActivity", "★ Text=${xpp.text}")
-                }
-            }
-            eventType = xpp.next()
-        }
-        // indicate app done reading the resource.
-        xpp.close()
+        // Parse XML
+        val xmlElement = parseXml()
 
         // setting file
         val base = getBaseFromSharedPreferences()
@@ -92,44 +64,30 @@ class SelectBaseActivity : AppCompatActivity() {
         val adapter = BaseItemAdapter(this, xmlElement, basePosition)
         listView.adapter = adapter
 
-
         listView.setOnScrollListener(
             object: AbsListView.OnScrollListener{
                 override fun onScroll(p0: AbsListView?, p1: Int, p2: Int, p3: Int) {
-                    Log.d( "tag", "scroll" )
-                    Log.d( "p1,p2,p3", "p1=$p1, p2=$p2, p3=$p3" )
-                    if (p3 == p1 + p2) {
-                        Log.d( "tag★", "次画面表示処理" )
-                    }
-
+//                    Log.d( "tag", "scroll" )
+//                    Log.d( "p1,p2,p3", "p1=$p1, p2=$p2, p3=$p3" )
+//                    if (p3 == p1 + p2) {
+//                        Log.d( "tag ###", "process for Next Screen( be done automatically)" )
+//                    }
                 }
                 override fun onScrollStateChanged(p0: AbsListView?, p1: Int) {
-                    Log.d( "tag★", "★p1=$p1" )
+                    Log.d( "tag ###", "### p1=$p1" )
                 }
-
             }
         )
 
-        listView.setOnItemClickListener { _, view, position, _ ->
+        listView.setOnItemClickListener { _, _, position, _ ->
 
             val clickedCurrency = xmlElement[position]
 
             // save selected currency into shared file
-            val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-            val editor = sharedPref.edit()
+            setBaseCodeToSharedPreferences(clickedCurrency.second)
 
-            //for the first time before SharedPreferences have set
-            editor.putString(getString(R.string.base), clickedCurrency.second)
-            editor.apply()
-
-//            view.isSelected = true
-
-            Log.d("BaseActivity", "★ position=$position")
-            Log.d("BaseActivity", "★ Selected=${clickedCurrency.second}")
-
-            // reflect changes recursively
-//            adapter = BaseItemAdapter(this, xmlElement, position)
-//            listView.adapter = adapter
+            Log.d("BaseActivity", "### position=$position")
+            Log.d("BaseActivity", "### Selected=${clickedCurrency.second}")
 
             // pass selected position to adapter
             adapter.initialPosition = position
@@ -145,6 +103,19 @@ class SelectBaseActivity : AppCompatActivity() {
         return sharedPref.getString(getString(R.string.base), null)  ?: getString(R.string.usd)
     }
 
+    /*
+     * Save selected base currency into shared file
+     */
+    private fun setBaseCodeToSharedPreferences(code: String) {
+        // save selected currency into shared file
+        val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        val editor = sharedPref.edit()
+
+        //for the first time before SharedPreferences have set
+        editor.putString(getString(R.string.base), code)
+        editor.apply()
+    }
+
 
     /*
      *  Baseとして選択された通貨の位置を取得する
@@ -157,6 +128,46 @@ class SelectBaseActivity : AppCompatActivity() {
             }
         }
         return  0
+    }
+
+    /*
+     *  Parse XML and Retrieve xml elements into ArrayList<Triple<png, code. country>> then return it.
+     */
+    private fun parseXml() : ArrayList<Triple<String, String, String>> {
+
+        val xmlElement: ArrayList<Triple<String, String, String>> = ArrayList()
+        val xpp :XmlResourceParser = resources.getXml(R.xml.currencies)
+        var eventType = xpp.eventType
+
+        while (eventType != XmlPullParser.END_DOCUMENT) {
+            when (eventType){
+                XmlPullParser.START_DOCUMENT -> {
+                    Log.d("getXml", "Start document")
+                }
+                XmlPullParser.START_TAG -> {
+                    Log.d("getXml", "Start tag =${xpp.name}")
+
+                    if (xpp.name == getString(R.string.item)) {
+                        val tri: Triple<String, String, String> = Triple(
+                            xpp.getAttributeValue(null, getString(R.string.png)),
+                            xpp.getAttributeValue(null, getString(R.string.code)),
+                            xpp.getAttributeValue(null, getString(R.string.country)))
+
+                        xmlElement.add(tri)
+                    }
+                }
+                XmlPullParser.END_TAG -> {
+                }
+                XmlPullParser.TEXT -> {
+                    Log.d("getXml", "### Text=${xpp.text}")
+                }
+            }
+            eventType = xpp.next()
+        }
+        // indicate app done reading the resource.
+        xpp.close()
+
+        return  xmlElement
     }
 
 
