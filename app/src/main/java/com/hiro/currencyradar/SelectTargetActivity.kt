@@ -63,16 +63,9 @@ class SelectTargetActivity : AppCompatActivity() {
         button.setOnClickListener {
             Log.d("TargetActivity:onCreate", "Save Button Clicked!")
 
-//            Toast.makeText(this, "選択行：$changedTargetPositions", Toast.LENGTH_LONG).show();
+//            Toast.makeText(this, "選択通貨：$changedTargetPositions", Toast.LENGTH_LONG).show();
 
-//            Log.d("TargetActivity", "★ listView.checkedItemCount. = ${listView.checkedItemCount}")
-            Log.d("TargetActivity", "★ listView.checkedItemCount. = ${listView.getCheckedItemPositions().size() }")
-
-            val checkedItemPositions = listView.checkedItemPositions
-            val checkedItemCount = checkedItemPositions.size()
-
-            Log.d("TargetActivity", "★ listView checkedItemCount = $checkedItemCount")
-//            Log.d("TargetActivity", "★ adapter ★checkedCount = ${listView.adapter.checkedCount}")
+            Log.d("TargetActivity", "★ checkedItemCount = ${changedTargetPositions.size}")
 
             Log.d("TargetActivity", "★ カウント ： ${changedTargetPositions.size}")
             when {
