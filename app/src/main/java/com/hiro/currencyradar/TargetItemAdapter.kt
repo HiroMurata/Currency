@@ -22,7 +22,6 @@ class TargetItemAdapter(private val context: Context,
     var selectedPosition = -1
     var changedTargetPositions = ArrayList(targetPositions)
 
-    var checkedCount = 0
 
     override fun getCount(): Int {
         return dataSource.size
@@ -77,7 +76,6 @@ class TargetItemAdapter(private val context: Context,
                 view.isSelected = true
                 checkedTextView.isChecked = true
                 checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_skyblue_24dp)
-                checkedCount++
             } else {
                 view.isSelected = false
                 checkedTextView.isChecked = false
@@ -124,7 +122,6 @@ class TargetItemAdapter(private val context: Context,
                             changedTargetPositions.remove(selectedPosition)
                         }
                         selectedPosition = -1
-                        checkedCount--
 
                     }
                 }
@@ -144,7 +141,6 @@ class TargetItemAdapter(private val context: Context,
                             changedTargetPositions.add(selectedPosition)
                         }
                         selectedPosition = -1
-                        checkedCount ++
                     }
                 }
 

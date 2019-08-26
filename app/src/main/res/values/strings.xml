@@ -22,6 +22,9 @@
     <string name="png">png</string>
     <string name="code">code</string>
     <string name="country">country</string>
+    <string name="dialog_title">Info</string>
+    <string name="dialog_message_at_least">Please select at least three currencies.</string>
+    <string name="dialog_message_over">Please select less than seven currencies.</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dash</string>
     <string name="title_notifications">JPY</string>

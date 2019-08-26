@@ -19,14 +19,10 @@ import org.xmlpull.v1.XmlPullParser
 import android.R.attr.gravity
 import android.widget.LinearLayout
 import android.R.drawable
+import android.app.PendingIntent.getActivity
 import android.widget.TextView
 import android.util.SparseBooleanArray
-
-
-
-
-//import javax.swing.text.StyleConstants.setIcon
-
+import android.widget.Toast
 
 
 
@@ -34,6 +30,8 @@ import android.util.SparseBooleanArray
 class SelectTargetActivity : AppCompatActivity() {
 
     private lateinit var listView: ListView
+    var changedTargetPositions : ArrayList<Int> = ArrayList()
+
 
     private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
@@ -63,7 +61,10 @@ class SelectTargetActivity : AppCompatActivity() {
         setContentView(R.layout.activity_select_target)
 
         button.setOnClickListener {
-            Log.d("TargetActivity:onCreate", "Button Clicked!")
+            Log.d("TargetActivity:onCreate", "Save Button Clicked!")
+
+//            Toast.makeText(this, "選択行：$changedTargetPositions", Toast.LENGTH_LONG).show();
+
 //            Log.d("TargetActivity", "★ listView.checkedItemCount. = ${listView.checkedItemCount}")
             Log.d("TargetActivity", "★ listView.checkedItemCount. = ${listView.getCheckedItemPositions().size() }")
 
@@ -73,53 +74,43 @@ class SelectTargetActivity : AppCompatActivity() {
             Log.d("TargetActivity", "★ listView checkedItemCount = $checkedItemCount")
 //            Log.d("TargetActivity", "★ adapter ★checkedCount = ${listView.adapter.checkedCount}")
 
-            var count = 0
-            for (i in 1 .. listView.childCount) {
-                // TODO consider getChildAtだと見えてるところしか取ってこれない。
-                if (listView.getChildAt(i-1).checkedTextView.isChecked)
-                    count++
-            }
-            Log.d("TargetActivity", "★ カウント ： $count")
+            Log.d("TargetActivity", "★ カウント ： ${changedTargetPositions.size}")
             when {
-                count == 0|| count == 1 || count == 2 -> {
+                changedTargetPositions.size == 0|| changedTargetPositions.size == 1 || changedTargetPositions.size == 2 -> {
                     // build alert dialog
                     val alertDialog = AlertDialog.Builder(this, R.style.MyAlertDialogStyle)
 
                     // ダイアログの設定
                     alertDialog.setIcon(R.drawable.ic_alart_orange_24dp)   //アイコン設定
-                    alertDialog.setTitle("Info")      //タイトル設定
-                    alertDialog.setMessage("Please select at least three currencies.")  //内容(メッセージ)設定
-                    alertDialog
+                    alertDialog.setTitle(getString(R.string.dialog_title))      //タイトル設定
+                    alertDialog.setMessage(getString(R.string.dialog_message_at_least))  //内容(メッセージ)設定
 
                     // OK(肯定的な)ボタンの設定
                     alertDialog.setPositiveButton("OK", DialogInterface.OnClickListener { dialog, which ->
                         // OKボタン押下時の処理
                         Log.d("AlertDialog", "Positive which :$which")
+
+
                     })
-
-
 
                     // ダイアログの作成と描画
                     // alertDialog.create();
                     alertDialog.show() // .show() including .create()
                 }
-                count >= 7 -> {
+                changedTargetPositions.size >= 7 -> {
                     // build alert dialog
                     val alertDialog = AlertDialog.Builder(this, R.style.MyAlertDialogStyle)
 
                     // ダイアログの設定
                     alertDialog.setIcon(R.drawable.ic_alart_orange_24dp)   //アイコン設定
-                    alertDialog.setTitle("Info")      //タイトル設定
-                    alertDialog.setMessage("Please select less than seven currencies.")  //内容(メッセージ)設定
-                    alertDialog
+                    alertDialog.setTitle(getString(R.string.dialog_title))      //タイトル設定
+                    alertDialog.setMessage(getString(R.string.dialog_message_over))  //内容(メッセージ)設定
 
                     // OK(肯定的な)ボタンの設定
                     alertDialog.setPositiveButton("OK", DialogInterface.OnClickListener { dialog, which ->
                         // OKボタン押下時の処理
                         Log.d("AlertDialog", "Positive which :$which")
                     })
-
-
 
                     // ダイアログの作成と描画
                     // alertDialog.create();
@@ -177,31 +168,14 @@ class SelectTargetActivity : AppCompatActivity() {
         // Create ListView of Layout for this screen
         listView = findViewById(R.id.listItems)
 
-/*        xmlElement.forEachIndexed { index, triple ->
-            if (targetPositions.contains(index)) {
-//                listView.getChildAt(index).checkedTextView.isChecked = true //
-                listView.setItemChecked(index, true)
-            } else {
-                listView.setItemChecked(index, false)
-            }
-        }*/
-
-
         val adapter = TargetItemAdapter(this,  xmlElement, targetPositions)
         listView.adapter = adapter
 
+        // keep targetPosition upon onCreate initially called
+        changedTargetPositions = adapter.changedTargetPositions
+
 
         listView.setOnItemClickListener { _, view, position, _ ->
-
-//            view.isSelected = true
-
-/*            if (listView.getChildAt(position).checkedTextView.isSelected) {
-                view.checkedTextView.isSelected = false
-                listView.getChildAt(position).checkedTextView.isSelected = false
-            } else {
-                listView.getChildAt(position).checkedTextView.isSelected = true
-            }*/
-
 
             // 1
             val clickedCurrency = xmlElement[position]
@@ -228,6 +202,8 @@ class SelectTargetActivity : AppCompatActivity() {
             // reflect changes recursively
             adapter.notifyDataSetChanged()
 
+            // update targetPosition when an Item Clicked
+            changedTargetPositions = adapter.changedTargetPositions
         }
 
     }
