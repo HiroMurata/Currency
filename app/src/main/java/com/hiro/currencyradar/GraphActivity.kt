@@ -24,11 +24,25 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import com.github.mikephil.charting.charts.RadarChart
+import com.github.mikephil.charting.components.Legend
+import com.github.mikephil.charting.components.YAxis
+import com.github.mikephil.charting.components.XAxis
+import android.R.layout
+import com.github.mikephil.charting.components.MarkerView
+import android.support.test.orchestrator.junit.BundleJUnitUtils.getDescription
+import android.R.id
+
+
+
+
 
 
 class GraphActivity : AppCompatActivity() {
 
     private lateinit var textMessage: TextView
+
+    private var chart: RadarChart? = null
 
     // Get rate
     var latestMap: Map<String, Any> = HashMap<String, Any>()
@@ -79,20 +93,68 @@ class GraphActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_graph)
-        val navViewTerm: BottomNavigationView = findViewById(R.id.nav_view_main)
+
+        // BottomNaviView setting
+        val navView: BottomNavigationView = findViewById(R.id.nav_view_main)
+        navView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
+        navView.getMenu().findItem(R.id.navigation_graph).setChecked(true)
 
 
-//        textMessage = findViewById(R.id.message)
-        navViewTerm.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
 
-        selectedCurrencyList = getSelectedCurrency()
+        chart = findViewById(R.id.chart1)
+        chart.setBackgroundColor(Color.rgb(60, 65, 82))
 
-        // Generate URL
-        val latestUrl: String = getLatestUrl()
-        val periodUrl: String = getPeriodUrl()
+        chart.description.isEnabled = false
 
-        println("【latestUrl】 : $latestUrl")
-        println("【periodUrl】 : $periodUrl")
+        chart.webLineWidth = 1f
+        chart.webColor = Color.LTGRAY
+        chart.webLineWidthInner = 1f
+        chart.webColorInner = Color.LTGRAY
+        chart.webAlpha = 100
+
+        // create a custom MarkerView (extend MarkerView) and specify the layout
+        // to use for it
+        val mv = RadarMarkerView(this, R.layout.radar_markerview)
+        mv.setChartView(chart) // For bounds control
+        chart.marker = mv // Set the marker to the chart
+
+        setData()
+
+        chart.animateXY(1400, 1400, Easing.EaseInOutQuad)
+
+        val xAxis = chart.xAxis
+        xAxis.typeface = tfLight
+        xAxis.textSize = 9f
+        xAxis.yOffset = 0f
+        xAxis.xOffset = 0f
+        xAxis.setValueFormatter(object : ValueFormatter() {
+
+            private val mActivities = arrayOf("Burger", "Steak", "Salad", "Pasta", "Pizza")
+
+            fun getFormattedValue(value: Float): String {
+                return mActivities[value.toInt() % mActivities.size]
+            }
+        })
+        xAxis.textColor = Color.WHITE
+
+        val yAxis = chart.yAxis
+        yAxis.typeface = tfLight
+        yAxis.setLabelCount(5, false)
+        yAxis.textSize = 9f
+        yAxis.axisMinimum = 0f
+        yAxis.axisMaximum = 80f
+        yAxis.setDrawLabels(false)
+
+        val l = chart.legend
+        l.verticalAlignment = Legend.LegendVerticalAlignment.TOP
+        l.horizontalAlignment = Legend.LegendHorizontalAlignment.CENTER
+        l.orientation = Legend.LegendOrientation.HORIZONTAL
+        l.setDrawInside(false)
+        l.typeface = tfLight
+        l.xEntrySpace = 7f
+        l.yEntrySpace = 5f
+        l.textColor = Color.WHITE
+
 
     }
 

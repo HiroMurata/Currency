@@ -20,6 +20,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import android.preference.PreferenceManager
 import android.content.SharedPreferences
 import android.os.AsyncTask
+import com.github.mikephil.charting.formatter.IValueFormatter
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -76,11 +77,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_main)
-//        button.setOnClickListener {
-//            Log.d("MainActivity: onCreate", "Button Clicked!")
-//            val intent = Intent(this, GraphActivity::class.java)
-//            startActivity(intent)
-//        }
 
         var textView = findViewById(R.id.codeTextView) as TextView
         textView.text = getBaseCurrency()
@@ -210,7 +206,6 @@ class MainActivity : AppCompatActivity() {
 
             val yLabels = ArrayList<String>()
             yLabels.add("")
-            yLabels.add("0.90")
             yLabels.add("0.95")
             yLabels.add("1.00")
             yLabels.add("1.05")
@@ -227,17 +222,17 @@ class MainActivity : AppCompatActivity() {
                 chart.setDrawWeb(true)
 
 //                chart.setBackgroundColor(Color.rgb(60, 65, 82));
-                chart.setWebLineWidth(1f);
-//                chart.setWebColor(Color.LTGRAY);
-                chart.setWebLineWidthInner(1f);
-                chart.setWebColorInner(Color.LTGRAY);
-                chart.setWebAlpha(500); //Webの色の濃さ？
+                chart.webLineWidth = 1f
+                chart.webLineWidthInner = 1f
+                chart.webColorInner = Color.LTGRAY
+//              chart.setWebColor(Color.LTGRAY)
+                chart.webAlpha = 500 //Webの色の濃さ？
 
                 chart.description.isEnabled = true // descriptionを表示する
                 chart.description.text = "こういうこと"
                 chart.isClickable = true
                 chart.legend.isEnabled = true //凡例
-                animateY(1200, Easing.EasingOption.Linear)
+                animateY(800, Easing.EasingOption.Linear)
                 chart.isRotationEnabled = false//ドラックすると回転するので制御する
 
                 chart.xAxis.setValueFormatter(IndexAxisValueFormatter(selectedCurrencyList))
@@ -245,11 +240,12 @@ class MainActivity : AppCompatActivity() {
 
 
 //                chart.yAxis.setTypeface(tfLight);
-                chart.yAxis.setLabelCount(0, true);
-                chart.yAxis.setTextSize(9f);
-                chart.yAxis.setTextColor(Color.BLUE);
-//                chart.yAxis.setAxisMinimum(0f);
-//                chart.yAxis.setAxisMaximum(1.3f);
+                chart.yAxis.setLabelCount(0, true)
+                chart.yAxis.setTextSize(9f)
+                chart.yAxis.setTextColor(Color.BLUE)
+//                chart.yAxis.setAxisMinimum(0.7f)
+//                chart.yAxis.setAxisMaximum(1.3f)
+                chart.yAxis.setDrawTopYLabelEntry(true)
 
 
 //                chart.yAxis.labelPosition.ordinal.and(0)
@@ -268,26 +264,22 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    /**
+     * Get URL for latest API
+     */
     private fun getLatestUrl(): String {
 
         val base = getBaseCurrency()
-
         var latestURL: String = getString(R.string.latest_url)
+        val csvStr = Utils.createCsvStringFromArrayList(selectedCurrencyList as ArrayList<String>)
 
-        var str = ""
-        selectedCurrencyList.forEachIndexed { index, value ->
-            when (index == 0) {
-                true  -> str += "$value"
-                false -> str += ",$value"
-            }
-        }
-        latestURL = "$latestURL?base=$base&symbols=$str"
+        latestURL = "$latestURL?base=$base&symbols=$csvStr"
         return latestURL
     }
 
 
-    /*
-     Get URL for period API
+    /**
+     * Get URL for period API
      */
     private fun getPeriodUrl(): String {
 
@@ -298,22 +290,16 @@ class MainActivity : AppCompatActivity() {
 
         val base = getBaseCurrency()
 
-        var str = ""
-        selectedCurrencyList.forEachIndexed { index, value ->
-            when (index == 0) {
-                true  -> str += "$value"
-                false -> str += ",$value"
-            }
-        }
+        val csvStr = Utils.createCsvStringFromArrayList(selectedCurrencyList as ArrayList<String>)
 
         var periodURL: String = getString(R.string.period_url)
-        periodURL = "$periodURL?start_at=$startDate&end_at=$endDate&base=$base&symbols=$str"
+        periodURL = "$periodURL?start_at=$startDate&end_at=$endDate&base=$base&symbols=$csvStr"
 
         return periodURL
     }
 
-    /*
-     Get selected currencies from setting file
+    /**
+     * Get selected currencies from setting file
      */
     private fun getBaseCurrency(): String {
 
@@ -322,43 +308,47 @@ class MainActivity : AppCompatActivity() {
         val editor = sharedPref.edit()
         var base : String? = sharedPref.getString(getString(R.string.base), "")
 
-        if (base.isNullOrEmpty()) {
-            base = getString(R.string.init_currency)
+        return when (base) {
+            null, "" -> {
+                base = getString(R.string.init_currency)
 
-            //for the first time before SharedPreferences have set
-            editor.putString(getString(R.string.base), base)
-            editor.apply()
+                //for the first time before SharedPreferences have set
+                editor.putString(getString(R.string.base), base)
+                editor.apply()
 
+                base //return
+            }
+            else ->
+                base //return
         }
-        return base ?: "USD"
     }
 
     /*
      Get selected currencies from setting file
      */
-    private fun getTargetCurrencies(): List<String> {
+    private fun getTargetCurrencies(): ArrayList<String> {
 
         // setting file
         val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val editor = sharedPref.edit()
-        val targets : String = sharedPref.getString("selected", "")
+        val targets : String? = sharedPref.getString("selected", "")
 
-        var items: List<String>
-        when (targets.isNullOrEmpty()){
-            true -> {
+        var items : ArrayList<String>
+        items = when (targets){
+            null, "" -> {
                 //for the first time before SharedPreferences have set
                 editor.putString("selected", getString(R.string.init_targets))
                 editor.apply()
 
-                items = getItems(getString(R.string.init_targets))
+                ArrayList(getItems(getString(R.string.init_targets)))
             }
-            false -> {
-                items = getItems(targets)
+            else -> {
+                ArrayList(getItems(targets))
             }
         }
         // remove base from selected just in case
-        val base : String = sharedPref.getString("base","")
-        items = items.minus(base)
+        val base : String = sharedPref.getString("base","") ?: ""
+        items.remove(base)
 
         return items
     }
@@ -389,7 +379,7 @@ class MainActivity : AppCompatActivity() {
             period = 7
             //for the first time before SharedPreferences have set
             editor.putInt("period", 7)
-            editor.commit()
+            editor.apply()
         }
 
         var calendar: Calendar = Calendar.getInstance();
@@ -420,13 +410,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun getLatestRate(): ArrayList<Float> {
         val latest: ArrayList<Float> = arrayListOf()
-        val rateMap = latestMap.get("rates") as HashMap<String, Double>
+        val rateMap = latestMap["rates"] as HashMap<String, Double>
 
         selectedCurrencyList.forEach {
             val dbl : Double? = rateMap.get(it)
             if (dbl != null)
                 latest.add(dbl.toFloat())
-            println("the element at $it " + dbl)
+            println("the element at $it $dbl")
         }
         return latest
     }
@@ -435,7 +425,7 @@ class MainActivity : AppCompatActivity() {
 
         // HashMap like  2019-07-26 : {EUR=0.897827258, CNY=6.8781648411, JPY=108.6909678578, GBP=0.8047495062}
         val dailyMap = periodMap.get("rates") as HashMap<String, Any>
-        println("&%&%&%&%&%&%&%    ★ ★ ★ ★ ★ ★& : dailyMap : " + dailyMap)
+        println("&%&%&%&%&%&%&%    ★ ★ ★ ★ ★ ★& : dailyMap : $dailyMap")
         println("&%&%&%&%&%&%&%    ★ ★ ★ ★ ★ ★& : dailyMap サイズ: " + dailyMap.size)
 
         var rateSumArray = DoubleArray(selectedCurrencyList.size)
@@ -498,8 +488,8 @@ class MainActivity : AppCompatActivity() {
 
         val dataSet = RadarDataSet(latestEntries, "Latest")
         dataSet.apply {
-            //整数で表示
-//            valueFormatter = IValueFormatter { value, _, _, _ -> "" + value.toInt() }
+            // Setting of Decimal place
+            valueFormatter = IValueFormatter { value, _, _, _ -> "" + "%.4f".format(value) }
             //塗りつぶし
             setDrawFilled(false)
             fillColor = Color.BLUE
@@ -514,8 +504,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         val dataSet2 = RadarDataSet(averageEntries, "Average").apply {
-            //整数で表示
-//                valueFormatter = IValueFormatter { value, _, _, _ -> "" + value.toInt() }
+            // Setting of Decimal place
+            valueFormatter = IValueFormatter { value, _, _, _ -> "" + "%.3f".format(value) }
+
             //塗りつぶし
             setDrawFilled(false)
             fillColor = Color.RED
