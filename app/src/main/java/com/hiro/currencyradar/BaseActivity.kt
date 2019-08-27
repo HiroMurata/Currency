@@ -13,7 +13,7 @@ import android.widget.AbsListView
 import org.xmlpull.v1.XmlPullParser
 
 
-class SelectBaseActivity : AppCompatActivity() {
+class BaseActivity : AppCompatActivity() {
 
     private lateinit var listView: ListView
 
@@ -31,12 +31,24 @@ class SelectBaseActivity : AppCompatActivity() {
             }
             R.id.navigation_target -> {
                 Log.d("BaseActivity: onCreate", "Button Target Clicked")
-                val intent = Intent(this, SelectTargetActivity::class.java)
+                val intent = Intent(this, TargetActivity::class.java)
                 startActivity(intent)
 
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_term -> {
+                Log.d("BaseActivity: onCreate", "Button Term Clicked")
+                val intent = Intent(this, TermActivity::class.java)
+                startActivity(intent)
+
+                return@OnNavigationItemSelectedListener true
+            }
+            R.id.navigation_graph -> {
+
+                Log.d("MainActivity: onCreate", "Button Graph Clicked!")
+                val intent = Intent(this, GraphActivity::class.java)
+                startActivity(intent)
+
                 return@OnNavigationItemSelectedListener true
             }
         }
@@ -45,7 +57,7 @@ class SelectBaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_select_base)
+        setContentView(R.layout.activity_base)
 
         // BottomNavigationView setting
         val navView: BottomNavigationView = findViewById(R.id.nav_view_main)

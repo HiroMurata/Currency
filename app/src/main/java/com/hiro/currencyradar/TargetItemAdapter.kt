@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.list_item.view.*
+import kotlinx.android.synthetic.main.list_currency.view.*
 
 /*
  * This Adapter is for getting Target Currencies
@@ -48,7 +48,7 @@ class TargetItemAdapter(private val context: Context,
             Log.d("Adapter: getView", "初期の方")
 
             // 2
-            view = inflater.inflate(R.layout.list_item, parent, false)
+            view = inflater.inflate(R.layout.list_currency, parent, false)
 
             // 3
             holder = ViewHolder()

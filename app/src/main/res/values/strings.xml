@@ -3,11 +3,13 @@
     <string name="base_currency_select">Base Currency Selection</string>
     <string name="target_currency_select">Comparison Currencies</string>
     <string name="term_select">Term Selection</string>
+    <string name="graph">Graph</string>
     <string name="setting">Setting</string>
     <string name="base">base</string>
     <string name="base_currency">Base Currency :</string>
     <string name="targets">targets</string>
     <string name="term">Term</string>
+    <string name="period">period</string>
     <string name="comparison">Comparison Currencies</string>
     <string name="usd">USD</string>
     <string name="eur">EUR</string>
@@ -19,6 +21,10 @@
     <string name="init_currency">USD</string>
     <string name="init_targets">EUR,GBP,JPY,CNY</string>
     <string name="item">item</string>
+    <string name="term_id">term_id</string>
+    <string name="item_term">term</string>
+    <string name="days">days</string>
+    <string name="init_term_id">00</string>
     <string name="png">png</string>
     <string name="code">code</string>
     <string name="country">country</string>

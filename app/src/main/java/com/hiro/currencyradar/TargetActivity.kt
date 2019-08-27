@@ -11,23 +11,12 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.design.widget.BottomNavigationView
 import android.util.Log
-import android.view.Gravity
 import android.widget.ListView
-import kotlinx.android.synthetic.main.activity_select_target.*
-import kotlinx.android.synthetic.main.list_item.view.checkedTextView
+import kotlinx.android.synthetic.main.activity_target.*
 import org.xmlpull.v1.XmlPullParser
-import android.R.attr.gravity
-import android.widget.LinearLayout
-import android.R.drawable
-import android.app.PendingIntent.getActivity
-import android.widget.TextView
-import android.util.SparseBooleanArray
-import android.widget.Toast
 
 
-
-
-class SelectTargetActivity : AppCompatActivity() {
+class TargetActivity : AppCompatActivity() {
 
     private lateinit var listView: ListView
     var changedTargetPositions : ArrayList<Int> = ArrayList()
@@ -44,12 +33,24 @@ class SelectTargetActivity : AppCompatActivity() {
             }
             R.id.navigation_base -> {
                 Log.d("TargetActivity:onCreate", "Button Base Clicked!")
-                val intent = Intent(this, SelectBaseActivity::class.java)
+                val intent = Intent(this, BaseActivity::class.java)
                 startActivity(intent)
 
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_term -> {
+                Log.d("TargetActivity:onCreate", "Button Term Clicked")
+                val intent = Intent(this, TermActivity::class.java)
+                startActivity(intent)
+
+                return@OnNavigationItemSelectedListener true
+            }
+            R.id.navigation_graph -> {
+
+                Log.d("MainActivity: onCreate", "Button Graph Clicked!")
+                val intent = Intent(this, GraphActivity::class.java)
+                startActivity(intent)
+
                 return@OnNavigationItemSelectedListener true
             }
         }
@@ -58,7 +59,7 @@ class SelectTargetActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_select_target)
+        setContentView(R.layout.activity_target)
 
         // BottomNavigationView setting
         val navView: BottomNavigationView = findViewById(R.id.nav_view_main)
@@ -136,7 +137,7 @@ class SelectTargetActivity : AppCompatActivity() {
                     // reflect changes recursively
                     adapter.notifyDataSetChanged()
 
-//                    intent = Intent(this, SelectTargetActivity::class.java)
+//                    intent = Intent(this, TargetActivity::class.java)
 //                    startActivity(intent)
 
                 }

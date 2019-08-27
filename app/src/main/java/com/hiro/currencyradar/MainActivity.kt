@@ -40,15 +40,7 @@ class MainActivity : AppCompatActivity() {
             R.id.navigation_base -> {
 
                 Log.d("MainActivity: onCreate", "Button Home Clicked!")
-                val intent = Intent(this, SelectBaseActivity::class.java)
-                startActivity(intent)
-
-                return@OnNavigationItemSelectedListener true
-            }
-            R.id.navigation_term -> {
-
-                Log.d("MainActivity: onCreate", "Button Term Clicked!")
-                val intent = Intent(this, SelectTermActivity::class.java)
+                val intent = Intent(this, BaseActivity::class.java)
                 startActivity(intent)
 
                 return@OnNavigationItemSelectedListener true
@@ -56,7 +48,14 @@ class MainActivity : AppCompatActivity() {
             R.id.navigation_target -> {
 
                 Log.d("MainActivity: onCreate", "Button Target Clicked!")
-                val intent = Intent(this, SelectTargetActivity::class.java)
+                val intent = Intent(this, TargetActivity::class.java)
+                startActivity(intent)
+
+                return@OnNavigationItemSelectedListener true
+            }
+            R.id.navigation_term -> {
+                Log.d("BaseActivity: onCreate", "Button Term Clicked")
+                val intent = Intent(this, TermActivity::class.java)
                 startActivity(intent)
 
                 return@OnNavigationItemSelectedListener true

@@ -10,14 +10,14 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name=".SelectBaseActivity"
+        <activity android:name=".BaseActivity"
             android:label="@string/base_currency_select" />
-        <activity android:name=".SelectTermActivity"
+        <activity android:name=".TermActivity"
             android:label="@string/term_select" />
-        <activity android:name=".SelectTargetActivity"
+        <activity android:name=".TargetActivity"
             android:label="@string/target_currency_select" />
-        <activity android:name=".GraphActivity">
-        </activity>
+        <activity android:name=".GraphActivity"
+            android:label="@string/graph" />
         <activity
                 android:name=".MainActivity"
                 android:label="@string/app_name">

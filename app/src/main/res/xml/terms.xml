@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item term_id="00" term="1 Week" days="7" />
+    <item term_id="01" term="2 Weeks" days="14" />
+    <item term_id="02" term="1 Month" days="30" />
+    <item term_id="03" term="2 Months" days="60" />
+    <item term_id="04" term="3 Months" days="90" />
+    <item term_id="05" term="Half Year" days="183" />
+    <item term_id="06" term="1 Year" days="365" />
+    <item term_id="07" term="2 Years" days="730" />
+    <item term_id="08" term="3 Years" days="1095" />
+</resources>

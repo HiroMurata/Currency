@@ -5,15 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import com.squareup.picasso.Picasso
 import android.util.Log
 
-
-/*
+/**
  * This Adapter is for getting Base Currency
  */
-class BaseItemAdapter(private val context: Context,
-                      private val dataSource: ArrayList<Triple<String, String, String>>,
+class TermItemAdapter(private val context: Context,
+                      private val dataSource: ArrayList<Triple<String, String, Int>>,
                       private val selectedPosition: Int) : BaseAdapter() {
 
     private val inflater: LayoutInflater
@@ -33,7 +31,7 @@ class BaseItemAdapter(private val context: Context,
         return position.toLong()
     }
 
-    /*
+    /**
      * this getView method  will be called repeatedly for dataSource(rows of currency.xml)
      * refer below site.
      * https://www.raywenderlich.com/155-android-listview-tutorial-with-kotlin
@@ -51,30 +49,29 @@ class BaseItemAdapter(private val context: Context,
             // Only first call is supposed to through here
 
             // 2
-            view = inflater.inflate(R.layout.list_currency, parent, false)
+            view = inflater.inflate(R.layout.list_term, parent, false)
 
             // 3
             holder = ViewHolder()
-            holder.thumbnailImageView = view.findViewById(R.id.imageView) as ImageView
-            holder.codeTextView = view.findViewById(R.id.codeTextView) as TextView
-            holder.countryTextView = view.findViewById(R.id.countryTextView) as TextView
+            holder.termTextView = view.findViewById(R.id.term_TextView) as TextView
+            holder.termDescriptionTextView = view.findViewById(R.id.term_description_TextView) as TextView
             holder.checkedTextView = view.findViewById(R.id.checkedTextView) as CheckedTextView
 
             // 4
             view.tag = holder
 
             // 6
-            val codeTextView = holder.codeTextView
-            val countryTextView = holder.countryTextView
+            val termTextView = holder.termTextView
+            val termDescriptionTextView = holder.termDescriptionTextView
             val checkedTextView = holder.checkedTextView
-            val thumbnailImageView = holder.thumbnailImageView
 
 
             // Get xml one row as Triple<png, code, country>
-            val item = getItem(position) as Triple<String, String, String>
+            val item = getItem(position) as Triple<String, String, Int>
 
-            codeTextView.text = item.second
-            countryTextView.text = item.third
+            termTextView.text = item.second
+            termDescriptionTextView.text = "Last ${item.third} days"
+
 
             when (initialPosition == position) {
                 true -> {
@@ -90,8 +87,6 @@ class BaseItemAdapter(private val context: Context,
                 }
             }
 
-            val png = item.first
-            Picasso.get().load("file:///android_asset/$png").into(thumbnailImageView)
 
         } else {
             Log.d("Adapter: getView", "エルスの方")
@@ -101,16 +96,16 @@ class BaseItemAdapter(private val context: Context,
             holder = convertView.tag as ViewHolder
 
             // 6
-            val codeTextView = holder.codeTextView
-            val countryTextView = holder.countryTextView
+            val termDescriptionTextView = holder.termDescriptionTextView
+            val termTextView = holder.termTextView
             val checkedTextView = holder.checkedTextView
-            val thumbnailImageView = holder.thumbnailImageView
 
             // Get xml one row as Triple<png, code, country>
-            val item = getItem(position) as Triple<String, String, String>
+            val item = getItem(position) as Triple<String, String, Int>
 
-            codeTextView.text = item.second
-            countryTextView.text = item.third
+            termTextView.text = item.second
+            termDescriptionTextView.text = "Last ${item.third} days"
+
 
             when (initialPosition == position) {
                 true -> {
@@ -143,17 +138,14 @@ class BaseItemAdapter(private val context: Context,
             }
             Log.d("Adapter: getView", "エルスの方 selectedPosition=$selectedPosition")
 
-            val png = item.first
-            Picasso.get().load("file:///android_asset/$png").into(thumbnailImageView)
         }
 
         return view
     }
 
     private class ViewHolder {
-        lateinit var thumbnailImageView: ImageView
-        lateinit var codeTextView: TextView
-        lateinit var countryTextView: TextView
+        lateinit var termTextView: TextView
+        lateinit var termDescriptionTextView: TextView
         lateinit var checkedTextView: CheckedTextView
     }
 }
