@@ -10,6 +10,8 @@ import android.widget.TextView
 import com.fasterxml.jackson.core.type.TypeReference
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.data.*
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.IRadarDataSet
 import kotlinx.android.synthetic.main.activity_main.*
@@ -19,8 +21,10 @@ import com.github.kittinunf.result.Result
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import android.preference.PreferenceManager
 import android.content.SharedPreferences
+import android.content.res.XmlResourceParser
 import android.os.AsyncTask
 import com.github.mikephil.charting.formatter.IValueFormatter
+import org.xmlpull.v1.XmlPullParser
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -30,8 +34,8 @@ import kotlin.collections.HashMap
 class MainActivity : AppCompatActivity() {
 
     // Get rate
-    var latestMap: Map<String, Any> = HashMap<String, Any>()
-    var periodMap: Map<String, Any> = HashMap<String, Any>()
+    var latestMap: Map<String, Any> = HashMap()
+    var periodMap: Map<String, Any> = HashMap()
     var selectedCurrencyList: List<String> = ArrayList()
 
     private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
@@ -78,7 +82,7 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
-        var textView = findViewById(R.id.codeTextView) as TextView
+        val textView = findViewById(R.id.codeTextView) as TextView
         textView.text = getBaseCurrency()
 
         // BottomNaviView setting
@@ -134,7 +138,7 @@ class MainActivity : AppCompatActivity() {
             super.onPostExecute(result)
 
             //Complicated Json must be used <String, Any>
-            var map: Map<String, Any> = HashMap<String, Any>()
+            val map: Map<String, Any>
             val mapper = jacksonObjectMapper()
 
             map = mapper.readValue(result, object : TypeReference<HashMap<String, Any>>() {
@@ -204,12 +208,16 @@ class MainActivity : AppCompatActivity() {
 
             val chart = radar_chart
 
-            val yLabels = ArrayList<String>()
-            yLabels.add("")
-            yLabels.add("0.95")
-            yLabels.add("1.00")
-            yLabels.add("1.05")
-            yLabels.add("1.10")
+//            val yLabels: List<String> = listOf("", "0.90,0.95,1.00", "0.95", "1.00", "1.05", "1.10")
+
+//            val yLabels = ArrayList<String>()
+//
+//            yLabels.add("0")
+//            yLabels.add("0.95")
+//            yLabels.add("1.00")
+//            yLabels.add("1.05")
+//            yLabels.add("1.10")
+//            yLabels.add("1.15")
 
             //表示データ取得
             chart.data = RadarData(getRadarData())
@@ -220,6 +228,7 @@ class MainActivity : AppCompatActivity() {
 
                 chart.invalidate()//チャートの表示を更新したいときに呼ぶ
                 chart.setDrawWeb(true)
+                chart.fitsSystemWindows = true
 
 //                chart.setBackgroundColor(Color.rgb(60, 65, 82));
                 chart.webLineWidth = 1f
@@ -228,7 +237,7 @@ class MainActivity : AppCompatActivity() {
 //              chart.setWebColor(Color.LTGRAY)
                 chart.webAlpha = 500 //Webの色の濃さ？
 
-                chart.description.isEnabled = true // descriptionを表示する
+                chart.description.isEnabled = false // descriptionを表示する
                 chart.description.text = "こういうこと"
                 chart.isClickable = true
                 chart.legend.isEnabled = true //凡例
@@ -236,21 +245,28 @@ class MainActivity : AppCompatActivity() {
                 chart.isRotationEnabled = false//ドラックすると回転するので制御する
 
                 chart.xAxis.setValueFormatter(IndexAxisValueFormatter(selectedCurrencyList))
-                chart.yAxis.setValueFormatter(IndexAxisValueFormatter(yLabels))
+//                chart.xAxis.labelRotationAngle = -30f
+//                chart.xAxis.yOffset = 100.3f
+//                chart.xAxis.xOffset = 100.3f
 
 
-//                chart.yAxis.setTypeface(tfLight);
-                chart.yAxis.setLabelCount(0, true)
+//                chart.yAxis.setValueFormatter(IndexAxisValueFormatter(yLabels))
+//                chart.yAxis.labelRotationAngle = -30f
+//                chart.yAxis.setTypeface(tfLight)
+//                chart.yAxis.setLabelCount(5, true) ?
+//                chart.yAxis.setLabelCount(5) ?
                 chart.yAxis.setTextSize(9f)
                 chart.yAxis.setTextColor(Color.BLUE)
-//                chart.yAxis.setAxisMinimum(0.7f)
-//                chart.yAxis.setAxisMaximum(1.3f)
+//                chart.yAxis.setAxisMinimum(0.95f)
+//                chart.yAxis.setAxisMaximum(1.05f)
                 chart.yAxis.setDrawTopYLabelEntry(true)
+//                chart.yAxis.yOffset = 100.3f
+//                chart.yAxis.xOffset = 100.3f
 
 
 //                chart.yAxis.labelPosition.ordinal.and(0)
 ////                chart.yAxis.labelPosition.ordinal.and(1)
-//                chart.yAxis.labelPosition.ordinal.and(2)
+                chart.yAxis.labelPosition.ordinal.and(4)
 //                chart.yAxis.labelPosition.ordinal.and(-1)
 
                 chart.yAxis.setDrawLabels(true)//値の目盛表記
@@ -331,13 +347,13 @@ class MainActivity : AppCompatActivity() {
         // setting file
         val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val editor = sharedPref.edit()
-        val targets : String? = sharedPref.getString("selected", "")
+        val targets : String? = sharedPref.getString("targets", "")
 
-        var items : ArrayList<String>
+        val items : ArrayList<String>
         items = when (targets){
             null, "" -> {
                 //for the first time before SharedPreferences have set
-                editor.putString("selected", getString(R.string.init_targets))
+                editor.putString("targets", getString(R.string.init_targets))
                 editor.apply()
 
                 ArrayList(getItems(getString(R.string.init_targets)))
@@ -366,13 +382,13 @@ class MainActivity : AppCompatActivity() {
     private fun getTargetDates(): Pair<String, String> {
 
         // end date
-        val date: Date = Date()
+        val date = Date()
         val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val endDate = format.format(date)
 
         // setting file
         val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        var editor = sharedPref.edit()
+        val editor = sharedPref.edit()
         var period = sharedPref.getInt("period", -1)
 
         if (period == -1) {
@@ -382,10 +398,10 @@ class MainActivity : AppCompatActivity() {
             editor.apply()
         }
 
-        var calendar: Calendar = Calendar.getInstance();
+        val calendar: Calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -period)
 
-        var startDate: Date = calendar.time
+        val startDate: Date = calendar.time
 
 
         // todo 設定から対象の期間をもってくる
@@ -402,7 +418,7 @@ class MainActivity : AppCompatActivity() {
 //        1095 // 3-year
 //        1825 // 5-year
 
-        var pair: Pair<String, String> = Pair(format.format(startDate), endDate)
+        val pair: Pair<String, String> = Pair(format.format(startDate), endDate)
         return  pair
     }
 
@@ -424,7 +440,7 @@ class MainActivity : AppCompatActivity() {
     private fun getAverageRate(): ArrayList<Float> {
 
         // HashMap like  2019-07-26 : {EUR=0.897827258, CNY=6.8781648411, JPY=108.6909678578, GBP=0.8047495062}
-        val dailyMap = periodMap.get("rates") as HashMap<String, Any>
+        val dailyMap = periodMap.get("rates") as HashMap<*, *>
         println("&%&%&%&%&%&%&%    ★ ★ ★ ★ ★ ★& : dailyMap : $dailyMap")
         println("&%&%&%&%&%&%&%    ★ ★ ★ ★ ★ ★& : dailyMap サイズ: " + dailyMap.size)
 
@@ -453,7 +469,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         println("\n☆☆☆ ☆☆☆☆☆☆ rateSumMap サイズ: ${rateSumMap.size}")
-        var returnList: ArrayList<Float> = ArrayList()
+        val returnList: ArrayList<Float> = ArrayList()
         selectedCurrencyList.forEach {
             println("\n☆☆☆ ☆☆☆☆☆☆ rateSumMap[it] : $rateSumMap[it]")
             returnList.add((rateSumMap[it]?.toFloat() ?: 0f) / dailyMap.size)
@@ -480,7 +496,7 @@ class MainActivity : AppCompatActivity() {
             for (index in selectedCurrencyList.indices) {
                 println("★  ★  ★ 【averageRate[$index]】" + averageRate[index])
                 println("★  ★  ★ 【latestRate[$index]】" + latestRate[index])
-                var value = latestRate[index]/averageRate[index]
+                val value = latestRate[index]/averageRate[index]
                 add(RadarEntry(value, index))
                 println("            ■ □ ■ □ グラフに埋め込む値[$index]【$value】")
             }
@@ -489,7 +505,7 @@ class MainActivity : AppCompatActivity() {
         val dataSet = RadarDataSet(latestEntries, "Latest")
         dataSet.apply {
             // Setting of Decimal place
-            valueFormatter = IValueFormatter { value, _, _, _ -> "" + "%.4f".format(value) }
+            valueFormatter = IValueFormatter { value, _, _, _ -> "" + "%.5f".format(value) }
             //塗りつぶし
             setDrawFilled(false)
             fillColor = Color.BLUE
@@ -499,9 +515,13 @@ class MainActivity : AppCompatActivity() {
             highLightColor = Color.BLUE
             //B色をセット
 //                setColors(intArrayOf(R.color.material_blue, R.color.material_green, R.color.material_yellow), this@MainActivity)
-            color = Color.rgb(0,0,200)
+            color = Color.rgb(0,0,255)
 //                setColor(R.color.material_yellow)
         }
+
+        // Parse XML
+        val xmlElement = parseXml()
+        val termPosition = getTermPosition (xmlElement, termId)
 
         val dataSet2 = RadarDataSet(averageEntries, "Average").apply {
             // Setting of Decimal place
@@ -530,6 +550,51 @@ class MainActivity : AppCompatActivity() {
         return radarDataSets
     }
 
+    /**
+     *  Parse XML and Retrieve xml elements into ArrayList<Triple<term_id, term, days>> then return it.
+     */
+    private fun parseXml() : ArrayList<Triple<String, String, Int>> {
+
+        val xmlElement: ArrayList<Triple<String, String, Int>> = ArrayList()
+        val xpp : XmlResourceParser = resources.getXml(R.xml.terms)
+        var eventType = xpp.eventType
+
+        while (eventType != XmlPullParser.END_DOCUMENT) {
+            when (eventType){
+                XmlPullParser.START_DOCUMENT -> {
+                    Log.d("getXml", "Start document")
+                }
+                XmlPullParser.START_TAG -> {
+                    Log.d("getXml", "Start tag =${xpp.name}")
+
+                    if (xpp.name == getString(R.string.item)) {
+                        val tri: Triple<String, String, Int> = Triple(
+                                xpp.getAttributeValue(null, getString(R.string.term_id)),
+                                xpp.getAttributeValue(null, getString(R.string.item_term)),
+                                (xpp.getAttributeValue(null, getString(R.string.days))).toInt())
+
+                        xmlElement.add(tri)
+                    }
+                }
+                XmlPullParser.END_TAG -> {
+                }
+                XmlPullParser.TEXT -> {
+                    Log.d("getXml", "### Text=${xpp.text}")
+                }
+            }
+            eventType = xpp.next()
+        }
+        // indicate app done reading the resource.
+        xpp.close()
+
+        return  xmlElement
+    }
+
+    private fun getTermIdFromSharedPreferences() : String {
+        // setting file
+        val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        return sharedPref.getString(getString(R.string.term_id), null)  ?: getString(R.string.init_term_id)
+    }
 
 }
 

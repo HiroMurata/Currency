@@ -24,7 +24,7 @@
     <string name="term_id">term_id</string>
     <string name="item_term">term</string>
     <string name="days">days</string>
-    <string name="init_term_id">00</string>
+    <string name="init_term_id">0</string>
     <string name="png">png</string>
     <string name="code">code</string>
     <string name="country">country</string>
