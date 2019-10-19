@@ -43,12 +43,11 @@ class TermActivity : AppCompatActivity() {
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_graph -> {
-
-                Log.d("MainActivity: onCreate", "Button Graph Clicked!")
-                val intent = Intent(this, GraphActivity::class.java)
-                startActivity(intent)
-
-                return@OnNavigationItemSelectedListener true
+//                Log.d("MainActivity: onCreate", "Button Graph Clicked!")
+//                val intent = Intent(this, GraphActivity::class.java)
+//                startActivity(intent)
+//
+//                return@OnNavigationItemSelectedListener true
             }
         }
         false
@@ -95,7 +94,7 @@ class TermActivity : AppCompatActivity() {
             val clickedTerm = xmlElement[position]
 
             // save selected currency into shared file
-            setTermIdToSharedPreferences(clickedTerm.first, clickedTerm.third)
+            setTermIdToSharedPreferences(clickedTerm)
 
             Log.d("BaseActivity", "### position=$position")
             Log.d("BaseActivity", "### Selected=${clickedTerm.second}")
@@ -117,14 +116,15 @@ class TermActivity : AppCompatActivity() {
     /*
      * Save selected term into shared file
      */
-    private fun setTermIdToSharedPreferences(term_id: String, days: Int) {
+    private fun setTermIdToSharedPreferences(triple: Triple<String, String, Int>) {
         // save selected currency into shared file
         val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val editor = sharedPref.edit()
 
         //for the first time before SharedPreferences have set
-        editor.putString(getString(R.string.term_id), term_id)
-        editor.putInt(getString(R.string.period), days)
+        editor.putString(getString(R.string.term_id), triple.first)
+        editor.putString(getString(R.string.item_term), triple.second)
+        editor.putInt(getString(R.string.period), triple.third)
         editor.apply()
     }
 

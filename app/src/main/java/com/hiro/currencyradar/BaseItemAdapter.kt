@@ -12,9 +12,10 @@ import android.util.Log
 /*
  * This Adapter is for getting Base Currency
  */
-class BaseItemAdapter(private val context: Context,
-                      private val dataSource: ArrayList<Triple<String, String, String>>,
-                      private val selectedPosition: Int) : BaseAdapter() {
+class BaseItemAdapter(
+    context: Context,
+    private val dataSource: ArrayList<Triple<String, String, String>>,
+    private val selectedPosition: Int) : BaseAdapter() {
 
     private val inflater: LayoutInflater
             = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -80,7 +81,10 @@ class BaseItemAdapter(private val context: Context,
                 true -> {
                     view.isSelected = true
                     checkedTextView.isChecked = true
-                    checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_orange_24dp)
+
+                    // 初期とエルスの動きを確認するためにはここの色を変えると理解しやすい
+//                    checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_orange_24dp)
+                    checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_green_24dp)
 
                 }
                 false -> {
@@ -116,7 +120,10 @@ class BaseItemAdapter(private val context: Context,
                 true -> {
                     view.isSelected = true
                     checkedTextView.isChecked = true
-                    checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_orange_24dp)
+
+                    // 初期とエルスの動きを確認するためにはここの色を変えると理解しやすい
+//                    checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_orange_24dp)
+                    checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_green_24dp)
 
                 }
                 false -> {

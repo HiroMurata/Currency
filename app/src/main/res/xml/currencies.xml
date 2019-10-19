@@ -18,9 +18,4 @@
     <item id="in" png="images/in.png" country="India" code="INR" />
     <item id="th" png="images/th.png" country="Thailand" code="THB" />
     <item id="kr" png="images/kr.png" country="Korea" code="KRW" />
-    <item id="ad" png="images/ad.png" country="TEST1" code="TES" />
-    <item id="ae" png="images/ae.png" country="TEST2" code="TST" />
-    <item id="ai" png="images/ai.png" country="TEST3" code="EST" />
-    <item id="at" png="images/at.png" country="TEST4" code="TES" />
-    <item id="ar" png="images/ar.png" country="TEST5" code="TTS" />
 </resources>

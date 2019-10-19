@@ -6,7 +6,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.XmlResourceParser
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AlertDialog
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.design.widget.BottomNavigationView
@@ -20,7 +20,6 @@ class TargetActivity : AppCompatActivity() {
 
     private lateinit var listView: ListView
     var changedTargetPositions : ArrayList<Int> = ArrayList()
-
 
     private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
@@ -46,12 +45,11 @@ class TargetActivity : AppCompatActivity() {
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_graph -> {
-
-                Log.d("MainActivity: onCreate", "Button Graph Clicked!")
-                val intent = Intent(this, GraphActivity::class.java)
-                startActivity(intent)
-
-                return@OnNavigationItemSelectedListener true
+//                Log.d("MainActivity: onCreate", "Button Graph Clicked!")
+//                val intent = Intent(this, GraphActivity::class.java)
+//                startActivity(intent)
+//
+//                return@OnNavigationItemSelectedListener true
             }
         }
         false
@@ -84,25 +82,21 @@ class TargetActivity : AppCompatActivity() {
 
         button.setOnClickListener {
             Log.d("TargetActivity:onCreate", "Save Button Clicked!")
-
-//            Toast.makeText(this, "選択通貨：$changedTargetPositions", Toast.LENGTH_LONG).show();
-
             Log.d("TargetActivity", "★ checkedItemCount = ${changedTargetPositions.size}")
 
-            Log.d("TargetActivity", "★ カウント ： ${changedTargetPositions.size}")
+            Log.d("TargetActivity", "★ Count ： ${changedTargetPositions.size}")
             when {
                 changedTargetPositions.size == 0 || changedTargetPositions.size == 1 || changedTargetPositions.size == 2 -> {
                     // build alert dialog
                     val alertDialog = AlertDialog.Builder(this, R.style.MyAlertDialogStyle)
 
-                    // ダイアログの設定
-                    alertDialog.setIcon(R.drawable.ic_alart_orange_24dp)   //アイコン設定
-                    alertDialog.setTitle(getString(R.string.dialog_title))      //タイトル設定
-                    alertDialog.setMessage(getString(R.string.dialog_message_at_least))  //内容(メッセージ)設定
+                    // Setting of dialog
+                    alertDialog.setIcon(R.drawable.ic_alart_orange_24dp)
+                    alertDialog.setTitle(getString(R.string.dialog_title))
+                    alertDialog.setMessage(getString(R.string.dialog_message_at_least))
 
-                    // OK(肯定的な)ボタンの設定
+                    // OK Button setting
                     alertDialog.setPositiveButton("OK", DialogInterface.OnClickListener { dialog, which ->
-                        // OKボタン押下時の処理
                         Log.d("AlertDialog", "Positive which :$which")
                         return@OnClickListener
                     })
@@ -129,20 +123,15 @@ class TargetActivity : AppCompatActivity() {
                     alertDialog.show() // .show() including .create()
                 }
                 else -> {
-                    Log.d("TargetActivity", "★ ★ ★ ★ ★ ★設定ファイル")
+                    Log.d("TargetActivity", "★ ★ ★ Setting File")
                     val list = Utils.getTargetCodesFromPositions(xmlElement, changedTargetPositions)
                     val csvCodes = Utils.createCsvStringFromArrayList(list)
                     setTargetCodesToSharedPreferences(csvCodes)
 
                     // reflect changes recursively
                     adapter.notifyDataSetChanged()
-
-//                    intent = Intent(this, TargetActivity::class.java)
-//                    startActivity(intent)
-
                 }
             }
-
         }
 
         listView.setOnItemClickListener { _, view, position, _ ->
@@ -151,7 +140,6 @@ class TargetActivity : AppCompatActivity() {
             val clickedCurrency = xmlElement[position]
             Log.d("TargetActivity", "★ clickedCurrency = $clickedCurrency")
             Log.d("TargetActivity", "★ clicked row = $position")
-
 
             // setting file
             targetCodes = getTargetCodesFromSharedPreferences()
@@ -166,11 +154,10 @@ class TargetActivity : AppCompatActivity() {
             // update targetPosition when an Item Clicked
             changedTargetPositions = adapter.changedTargetPositions
         }
-
     }
 
 
-    /*
+    /**
      * Retrieve target code of currencies from shared file
      */
     private fun getTargetCodesFromSharedPreferences(): ArrayList<String> {
@@ -182,7 +169,7 @@ class TargetActivity : AppCompatActivity() {
     }
 
 
-    /*
+    /**
      * Save selected base currency into shared file
      */
     private fun setTargetCodesToSharedPreferences(csv: String) {
@@ -195,9 +182,9 @@ class TargetActivity : AppCompatActivity() {
         editor.apply()
     }
 
-    /*
- *  Parse XML and Retrieve xml elements into ArrayList<Triple<png, code. country>> then return it.
- */
+    /**
+     *  Parse XML and Retrieve xml elements into ArrayList<Triple<png, code. country>> then return it.
+     */
     private fun parseXml() : ArrayList<Triple<String, String, String>> {
 
         val xmlElement: ArrayList<Triple<String, String, String>> = ArrayList()
@@ -234,7 +221,5 @@ class TargetActivity : AppCompatActivity() {
 
         return  xmlElement
     }
-
-
 
 }

@@ -10,8 +10,6 @@ import android.widget.TextView
 import com.fasterxml.jackson.core.type.TypeReference
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.data.*
-import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.interfaces.datasets.IRadarDataSet
 import kotlinx.android.synthetic.main.activity_main.*
@@ -28,7 +26,7 @@ import org.xmlpull.v1.XmlPullParser
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
+import kotlin.collections.HashMap as HashMap1
 
 
 class MainActivity : AppCompatActivity() {
@@ -39,11 +37,9 @@ class MainActivity : AppCompatActivity() {
     var selectedCurrencyList: List<String> = ArrayList()
 
     private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-//        val sharedPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         when (item.itemId) {
             R.id.navigation_base -> {
-
                 Log.d("MainActivity: onCreate", "Button Home Clicked!")
                 val intent = Intent(this, BaseActivity::class.java)
                 startActivity(intent)
@@ -51,7 +47,6 @@ class MainActivity : AppCompatActivity() {
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_target -> {
-
                 Log.d("MainActivity: onCreate", "Button Target Clicked!")
                 val intent = Intent(this, TargetActivity::class.java)
                 startActivity(intent)
@@ -66,12 +61,11 @@ class MainActivity : AppCompatActivity() {
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_graph -> {
-
-                Log.d("MainActivity: onCreate", "Button Graph Clicked!")
-                val intent = Intent(this, GraphActivity::class.java)
-                startActivity(intent)
-
-                return@OnNavigationItemSelectedListener true
+//                Log.d("MainActivity: onCreate", "Button Graph Clicked!")
+//                val intent = Intent(this, GraphActivity::class.java)
+//                startActivity(intent)
+//
+//                return@OnNavigationItemSelectedListener true
             }
         }
         false
@@ -82,15 +76,13 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
-        val textView = findViewById(R.id.codeTextView) as TextView
+        val textView = findViewById<TextView>(R.id.codeTextView)
         textView.text = getBaseCurrency()
 
         // BottomNaviView setting
         val navView: BottomNavigationView = findViewById(R.id.nav_view_main)
         navView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
-        navView.getMenu().findItem(R.id.navigation_radar).setChecked(true)
-
-
+        navView.getMenu().findItem(R.id.navigation_radar).isChecked = true
 
         selectedCurrencyList = getTargetCurrencies()
 
@@ -98,14 +90,13 @@ class MainActivity : AppCompatActivity() {
         val latestUrl: String = getLatestUrl()
         val periodUrl: String = getPeriodUrl()
 
-        println("【latestUrl】 : $latestUrl")
-        println("【periodUrl】 : $periodUrl")
+        Log.d("【latestUrl】 :", latestUrl)
+        Log.d("【periodUrl】 :", periodUrl)
 
         //Async
         AsyncTaskGetLatest().execute(latestUrl)
         AsyncTaskGetAverage().execute(periodUrl)
         AsyncTaskGetChart().execute()
-
     }
 
 
@@ -117,15 +108,15 @@ class MainActivity : AppCompatActivity() {
 
         override fun doInBackground(vararg args: String): String? {
 
-            val (request, response, result) = args[0].httpGet().responseString()
+            val (_, response, result) = args[0].httpGet().responseString()
 
             when (result) {
                 is  Result.Success -> {
                     // Show Result
-                    println("Result of Asynchronous Process : " + String(response.data))
+                    Log.d("Result Asynch Process:", String(response.data))
                 }
                 is Result.Failure -> {
-                    println("Connection Failure")
+                    Log.d("Result Asynch Process:", "Connection Failure")
                 }
             }
 
@@ -142,7 +133,6 @@ class MainActivity : AppCompatActivity() {
             val mapper = jacksonObjectMapper()
 
             map = mapper.readValue(result, object : TypeReference<HashMap<String, Any>>() {
-
             })
 
             latestMap = HashMap(map)
@@ -157,15 +147,15 @@ class MainActivity : AppCompatActivity() {
 
         override fun doInBackground(vararg args: String): String? {
 
-            val (request, response, result) = args[0].httpGet().responseString()
+            val (_, response, result) = args[0].httpGet().responseString()
 
             when (result) {
                 is  Result.Success -> {
                     // Show Result
-                    println("Result of Asynchronous Process : " + String(response.data))
+                    Log.d("Result Asynch Process:", String(response.data))
                 }
                 is Result.Failure -> {
-                    println("Connection Failure")
+                    Log.d("Result Asynch Process:", "Connection Failure")
                 }
             }
 
@@ -179,11 +169,10 @@ class MainActivity : AppCompatActivity() {
 
             //===============================    JSON Purser    ===============================
             //Complicated Json must be used <String, Any>
-            var map: Map<String, Any> = HashMap<String, Any>()
+            val map: HashMap<String, Any>
             val mapper = jacksonObjectMapper()
 
             map = mapper.readValue(result, object : TypeReference<HashMap<String, Any>>() {
-
             })
 
             periodMap = HashMap(map)
@@ -204,24 +193,10 @@ class MainActivity : AppCompatActivity() {
             super.onPostExecute(result)
 
             //===============================    FOR GRAPH    ===============================
-            val selected:  ArrayList<String>
-
             val chart = radar_chart
-
-//            val yLabels: List<String> = listOf("", "0.90,0.95,1.00", "0.95", "1.00", "1.05", "1.10")
-
-//            val yLabels = ArrayList<String>()
-//
-//            yLabels.add("0")
-//            yLabels.add("0.95")
-//            yLabels.add("1.00")
-//            yLabels.add("1.05")
-//            yLabels.add("1.10")
-//            yLabels.add("1.15")
 
             //表示データ取得
             chart.data = RadarData(getRadarData())
-
 
             //グラフ上の表示
             chart.apply {
@@ -238,13 +213,13 @@ class MainActivity : AppCompatActivity() {
                 chart.webAlpha = 500 //Webの色の濃さ？
 
                 chart.description.isEnabled = false // descriptionを表示する
-                chart.description.text = "こういうこと"
+                chart.description.text = "あいうえお"
                 chart.isClickable = true
                 chart.legend.isEnabled = true //凡例
                 animateY(800, Easing.EasingOption.Linear)
-                chart.isRotationEnabled = false//ドラックすると回転するので制御する
+                chart.isRotationEnabled = true //rotation of graph
 
-                chart.xAxis.setValueFormatter(IndexAxisValueFormatter(selectedCurrencyList))
+                chart.xAxis.valueFormatter = IndexAxisValueFormatter(selectedCurrencyList)
 //                chart.xAxis.labelRotationAngle = -30f
 //                chart.xAxis.yOffset = 100.3f
 //                chart.xAxis.xOffset = 100.3f
@@ -255,8 +230,8 @@ class MainActivity : AppCompatActivity() {
 //                chart.yAxis.setTypeface(tfLight)
 //                chart.yAxis.setLabelCount(5, true) ?
 //                chart.yAxis.setLabelCount(5) ?
-                chart.yAxis.setTextSize(9f)
-                chart.yAxis.setTextColor(Color.BLUE)
+                chart.yAxis.textSize = 9f
+                chart.yAxis.textColor = Color.BLUE
 //                chart.yAxis.setAxisMinimum(0.95f)
 //                chart.yAxis.setAxisMaximum(1.05f)
                 chart.yAxis.setDrawTopYLabelEntry(true)
@@ -371,7 +346,6 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun getItems(str: String): List<String> {
-//        val items = str.split(",")
         return str.split(",")
     }
 
@@ -398,38 +372,22 @@ class MainActivity : AppCompatActivity() {
             editor.apply()
         }
 
-        val calendar: Calendar = Calendar.getInstance();
+        val calendar: Calendar = Calendar.getInstance()
         calendar.add(Calendar.DATE, -period)
 
         val startDate: Date = calendar.time
 
-
-        // todo 設定から対象の期間をもってくる
-        // コードがそのまま期間（日）
-//        0 //
-//        7 // 1 week
-//        14 // 2-week
-//        30 // 1-month
-//        60 // 2-month
-//        90 // 3-month
-//        180 // half year
-//        365 // 1-year
-//        730 // 2-year
-//        1095 // 3-year
-//        1825 // 5-year
-
-        val pair: Pair<String, String> = Pair(format.format(startDate), endDate)
-        return  pair
+        return Pair(format.format(startDate), endDate)
     }
 
 
 
     private fun getLatestRate(): ArrayList<Float> {
-        val latest: ArrayList<Float> = arrayListOf()
+        val latest = arrayListOf<Float>()
         val rateMap = latestMap["rates"] as HashMap<String, Double>
 
         selectedCurrencyList.forEach {
-            val dbl : Double? = rateMap.get(it)
+            val dbl : Double? = rateMap[it]
             if (dbl != null)
                 latest.add(dbl.toFloat())
             println("the element at $it $dbl")
@@ -441,10 +399,10 @@ class MainActivity : AppCompatActivity() {
 
         // HashMap like  2019-07-26 : {EUR=0.897827258, CNY=6.8781648411, JPY=108.6909678578, GBP=0.8047495062}
         val dailyMap = periodMap.get("rates") as HashMap<*, *>
-        println("&%&%&%&%&%&%&%    ★ ★ ★ ★ ★ ★& : dailyMap : $dailyMap")
-        println("&%&%&%&%&%&%&%    ★ ★ ★ ★ ★ ★& : dailyMap サイズ: " + dailyMap.size)
+        Log.d("getAverageRate : ", "★ ★ ★ ★ ★ ★& : dailyMap : $dailyMap")
+        Log.d("getAverageRate : ", "★ ★ ★ ★ ★ ★& : dailyMap size: " + dailyMap.size)
 
-        var rateSumArray = DoubleArray(selectedCurrencyList.size)
+        DoubleArray(selectedCurrencyList.size)
         var rateSumMap : HashMap<String, Double> = HashMap()
         selectedCurrencyList.forEach {
             // initialize rateSumMap with selected currency and value 0.0
@@ -454,13 +412,13 @@ class MainActivity : AppCompatActivity() {
         // Get Sum amount for each currency by using HashMap
         for ((k, v) in dailyMap) {
         // dailyMap as key: currency, value: value. such like  2019-07-31 : {EUR=0.89678, CNY=6.80347, ....}, 2019-08-02 : {EUR=0.90041, CNY=6.938694, ....}
-            println("\n☆☆☆ dailyMap : $k : $v")
+            Log.d("getAverageRate : ", "\n☆☆☆ dailyMap : $k : $v")
 
             @Suppress("UNCHECKED_CAST")
             val oneDayMap = v as HashMap<String, Double>
             // oneDayMap as key: currency : value: value. such like EUR=0.897827258, CNY=6.8781648411, JPY=108.6909678578, GBP=0.8047495062
 
-            var dbl : Double = 0.0
+            var dbl: Double
             selectedCurrencyList.forEach {
                 dbl = rateSumMap[it]?: 0.0
                 dbl += oneDayMap[it]?: 0.0
@@ -468,10 +426,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        println("\n☆☆☆ ☆☆☆☆☆☆ rateSumMap サイズ: ${rateSumMap.size}")
+        Log.d("getAverageRate : ", "\n☆☆☆ ☆☆☆☆☆☆ rateSumMap サイズ: ${rateSumMap.size}")
+
         val returnList: ArrayList<Float> = ArrayList()
         selectedCurrencyList.forEach {
-            println("\n☆☆☆ ☆☆☆☆☆☆ rateSumMap[it] : $rateSumMap[it]")
+            Log.d("getAverageRate : ", "\n☆☆☆ ☆☆☆☆☆☆ rateSumMap[it] : $rateSumMap[it]")
             returnList.add((rateSumMap[it]?.toFloat() ?: 0f) / dailyMap.size)
 
         }
@@ -494,11 +453,13 @@ class MainActivity : AppCompatActivity() {
 
         val latestEntries = ArrayList<RadarEntry>().apply {
             for (index in selectedCurrencyList.indices) {
-                println("★  ★  ★ 【averageRate[$index]】" + averageRate[index])
-                println("★  ★  ★ 【latestRate[$index]】" + latestRate[index])
+                Log.d("getRadarData : ", "★  ★  ★ 【averageRate[$index]】" + averageRate[index])
+                Log.d("getRadarData : ", "★  ★  ★ 【latestRate[$index]】" + latestRate[index])
+
                 val value = latestRate[index]/averageRate[index]
                 add(RadarEntry(value, index))
-                println("            ■ □ ■ □ グラフに埋め込む値[$index]【$value】")
+
+                Log.d("getRadarData : ", "     ■ □ ■ □ グラフに埋め込む値[$index]【$value】")
             }
         }
 
@@ -520,10 +481,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Parse XML
+        val termId = getTermIdFromSharedPreferences()
         val xmlElement = parseXml()
         val termPosition = getTermPosition (xmlElement, termId)
 
-        val dataSet2 = RadarDataSet(averageEntries, "Average").apply {
+        val dataSet2 = RadarDataSet(averageEntries, "Average of past ${termPosition.second}").apply {
             // Setting of Decimal place
             valueFormatter = IValueFormatter { value, _, _, _ -> "" + "%.3f".format(value) }
 
@@ -545,7 +507,6 @@ class MainActivity : AppCompatActivity() {
         val radarDataSets = ArrayList<IRadarDataSet>()
         radarDataSets.add(dataSet)
         radarDataSets.add(dataSet2)
-
 
         return radarDataSets
     }
@@ -596,5 +557,13 @@ class MainActivity : AppCompatActivity() {
         return sharedPref.getString(getString(R.string.term_id), null)  ?: getString(R.string.init_term_id)
     }
 
-}
+    private fun getTermPosition(xml: ArrayList<Triple<String, String, Int>>, position: String) : Triple<String, String, Int> {
+        xml.forEach {
+            if (it.first == position)
+                return it
+        }
+        return Triple("0", "1 Week", 7)
+    }
 
+
+}

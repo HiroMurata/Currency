@@ -12,9 +12,10 @@ import kotlinx.android.synthetic.main.list_currency.view.*
 /*
  * This Adapter is for getting Target Currencies
  */
-class TargetItemAdapter(private val context: Context,
-                        private val dataSource: ArrayList<Triple<String, String, String>>,
-                        private val targetPositions: ArrayList<Int>) : BaseAdapter() {
+class TargetItemAdapter(
+    context: Context,
+    private val dataSource: ArrayList<Triple<String, String, String>>,
+    private val targetPositions: ArrayList<Int>) : BaseAdapter() {
 
     private val inflater: LayoutInflater
             = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -111,7 +112,8 @@ class TargetItemAdapter(private val context: Context,
             if (changedTargetPositions.contains(position)) {
                 view.isSelected = true
                 checkedTextView.isChecked = true
-                checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_green_24dp)
+//                checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_green_24dp)
+                checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_skyblue_24dp)
 
                 when (position == selectedPosition) {
                     true -> {
@@ -136,14 +138,14 @@ class TargetItemAdapter(private val context: Context,
                     true -> {
                         view.isSelected = true //Save用に追加（効いてない）
                         view.checkedTextView.isChecked = true
-                        view.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_green_24dp)
+//                        view.checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_green_24dp)
+                        checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_box_skyblue_24dp)
                         if (!changedTargetPositions.contains(selectedPosition)) {
                             changedTargetPositions.add(selectedPosition)
                         }
                         selectedPosition = -1
                     }
                 }
-
             }
 
             // handle only for clicked row
@@ -152,9 +154,7 @@ class TargetItemAdapter(private val context: Context,
 
             val png = item.first
             Picasso.get().load("file:///android_asset/$png").into(thumbnailImageView)
-
         }
-
         return view
     }
 

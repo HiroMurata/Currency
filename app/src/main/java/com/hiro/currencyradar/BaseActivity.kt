@@ -46,10 +46,10 @@ class BaseActivity : AppCompatActivity() {
             R.id.navigation_graph -> {
 
                 Log.d("MainActivity: onCreate", "Button Graph Clicked!")
-                val intent = Intent(this, GraphActivity::class.java)
-                startActivity(intent)
+//                val intent = Intent(this, GraphActivity::class.java)
+//                startActivity(intent)
 
-                return@OnNavigationItemSelectedListener true
+//                return@OnNavigationItemSelectedListener true
             }
         }
         false
@@ -79,12 +79,8 @@ class BaseActivity : AppCompatActivity() {
         listView.setOnScrollListener(
             object: AbsListView.OnScrollListener{
                 override fun onScroll(p0: AbsListView?, p1: Int, p2: Int, p3: Int) {
-//                    Log.d( "tag", "scroll" )
-//                    Log.d( "p1,p2,p3", "p1=$p1, p2=$p2, p3=$p3" )
-//                    if (p3 == p1 + p2) {
-//                        Log.d( "tag ###", "process for Next Screen( be done automatically)" )
-//                    }
                 }
+
                 override fun onScrollStateChanged(p0: AbsListView?, p1: Int) {
                     Log.d( "tag ###", "### p1=$p1" )
                 }

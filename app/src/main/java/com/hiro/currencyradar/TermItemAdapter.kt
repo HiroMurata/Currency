@@ -10,9 +10,10 @@ import android.util.Log
 /**
  * This Adapter is for getting Base Currency
  */
-class TermItemAdapter(private val context: Context,
-                      private val dataSource: ArrayList<Triple<String, String, Int>>,
-                      private val selectedPosition: Int) : BaseAdapter() {
+class TermItemAdapter(
+    context: Context,
+    private val dataSource: ArrayList<Triple<String, String, Int>>,
+    private val selectedPosition: Int) : BaseAdapter() {
 
     private val inflater: LayoutInflater
             = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -78,6 +79,7 @@ class TermItemAdapter(private val context: Context,
                     view.isSelected = true
                     checkedTextView.isChecked = true
                     checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_orange_24dp)
+                    checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_green_24dp)
 
                 }
                 false -> {
@@ -100,7 +102,7 @@ class TermItemAdapter(private val context: Context,
             val termTextView = holder.termTextView
             val checkedTextView = holder.checkedTextView
 
-            // Get xml one row as Triple<png, code, country>
+            // Get xml one row as Triple<term_id, term, days>
             val item = getItem(position) as Triple<String, String, Int>
 
             termTextView.text = item.second
@@ -112,6 +114,7 @@ class TermItemAdapter(private val context: Context,
                     view.isSelected = true
                     checkedTextView.isChecked = true
                     checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_orange_24dp)
+                    checkedTextView.setCheckMarkDrawable(R.drawable.ic_check_circle_green_24dp)
 
                 }
                 false -> {
